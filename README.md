@@ -336,4 +336,4 @@ PassDepot/
 
 Проект распространяется по лицензии [MIT](LICENSE).
 
-Copyright © 2026 Evgenii Petraschcuk
+Copyright © 2026 Evgenii Petrashchuk
