@@ -1,0 +1,19 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "PassDepot",
+  "outputfilename": "PassDepot",
+  "frontend:install": "npm install",
+  "frontend:build": "npm run build",
+  "frontend:dev:watcher": "npm run dev",
+  "frontend:dev:serverUrl": "auto",
+  "author": {
+    "name": "Evgeniy-51",
+    "email": "evgeniy-51@yandex.ru"
+  },
+  "info": {
+    "productVersion": "0.2.0",
+    "productName": "PassDepot",
+    "companyName": "Evgeniy-51",
+    "comments": "PassDepot v0.2"
+  }
+}

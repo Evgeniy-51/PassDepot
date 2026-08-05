@@ -1,0 +1,59 @@
+# Allowlist: по умолчанию игнорируется всё. Новые файлы не попадут в git,
+# пока явно не добавите правило «!путь» ниже.
+
+*
+
+# Нужно для обхода каталогов
+!*/
+
+# --- Корень: исходники и конфиг ---
+!.gitignore
+!LICENSE
+!README.md
+!main.go
+!go.mod
+!go.sum
+!wails.json
+
+# --- Backend (Go) ---
+!internal/
+!internal/**
+
+# --- Frontend: исходники, конфиг, Wails bindings ---
+!frontend/
+!frontend/index.html
+!frontend/package.json
+!frontend/package-lock.json
+!frontend/tsconfig.json
+!frontend/tsconfig.node.json
+!frontend/vite.config.ts
+!frontend/src/
+!frontend/src/**
+!frontend/wailsjs/
+!frontend/wailsjs/**
+
+# --- Сборка: иконки, NSIS, dev-tool для appicon ---
+!build/
+!build/README.md
+!build/appicon.png
+!build/darwin/
+!build/darwin/**
+!build/icon-gen/
+!build/icon-gen/generate.mjs
+!build/icon-gen/package.json
+!build/icon-gen/package-lock.json
+!build/windows/
+!build/windows/icon.ico
+!build/windows/info.json
+!build/windows/wails.exe.manifest
+!build/windows/installer/
+!build/windows/installer/project.nsi
+!build/windows/installer/wails_tools.nsh
+
+# --- Явные исключения внутри разрешённых деревьев ---
+build/bin/
+build/windows/installer/tmp/
+build/icon-gen/node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/package.json.md5

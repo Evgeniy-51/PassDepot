@@ -1,0 +1,242 @@
+/* Default = Blue (dark navy + blue accent) */
+:root,
+html[data-theme='blue'] {
+    color-scheme: dark;
+
+    --pd-bg: #0b1220;
+    --pd-bg-end: #1a2740;
+    --pd-bg-gradient: linear-gradient(135deg, var(--pd-bg) 0%, var(--pd-bg-end) 100%);
+    --pd-surface: #111c2e;
+    --pd-surface-raised: #17243a;
+    --pd-surface-hover: #1d2d47;
+    --pd-surface-active: #263957;
+    --pd-input: #2b3b52;
+    --pd-input-muted: #34465f;
+    --pd-overlay: rgba(3, 8, 18, 0.72);
+
+    --pd-text: #f3f6fb;
+    --pd-text-muted: #a8b4c6;
+    --pd-text-subtle: #78879d;
+    --pd-text-on-accent: #ffffff;
+    --pd-text-disabled: rgba(168, 180, 198, 0.48);
+
+    /* Accent — blue */
+    --pd-accent-red: #ff6b61;
+    --pd-accent-red-hover: #ff8178;
+    --pd-accent-red-active: #e95850;
+    --pd-accent-red-soft: rgba(255, 107, 97, 0.14);
+    --pd-accent-red-soft-hover: rgba(255, 107, 97, 0.24);
+    --pd-accent-red-border: rgba(255, 107, 97, 0.52);
+    --pd-accent-red-glow: rgba(255, 107, 97, 0.28);
+    --pd-focus-ring-red: 0 0 0 3px rgba(255, 107, 97, 0.24);
+    --pd-shadow-accent-red: 0 2px 10px rgba(255, 107, 97, 0.28);
+
+    --pd-accent-blue: #5b8def;
+    --pd-accent-blue-hover: #7ab4f7;
+    --pd-accent-blue-active: #4a7fd4;
+    --pd-accent-blue-soft: rgba(91, 141, 239, 0.14);
+    --pd-accent-blue-soft-hover: rgba(91, 141, 239, 0.24);
+    --pd-accent-blue-border: rgba(91, 141, 239, 0.52);
+    --pd-accent-blue-glow: rgba(91, 141, 239, 0.28);
+    --pd-focus-ring-blue: 0 0 0 3px rgba(91, 141, 239, 0.24);
+    --pd-shadow-accent-blue: 0 2px 10px rgba(91, 141, 239, 0.28);
+
+    --pd-accent: var(--pd-accent-blue);
+    --pd-accent-hover: var(--pd-accent-blue-hover);
+    --pd-accent-active: var(--pd-accent-blue-active);
+    --pd-accent-soft: var(--pd-accent-blue-soft);
+    --pd-accent-soft-hover: var(--pd-accent-blue-soft-hover);
+    --pd-accent-border: var(--pd-accent-blue-border);
+    --pd-accent-glow: var(--pd-accent-blue-glow);
+    --pd-focus-ring: var(--pd-focus-ring-blue);
+    --pd-shadow-accent: var(--pd-shadow-accent-blue);
+
+    --pd-success: #35c979;
+    --pd-success-hover: #28ad66;
+    --pd-success-active: #208e55;
+    --pd-success-soft: rgba(53, 201, 121, 0.14);
+    --pd-success-border: rgba(53, 201, 121, 0.42);
+
+    --pd-warning: #f2b84b;
+    --pd-warning-hover: #d99d31;
+    --pd-warning-soft: rgba(242, 184, 75, 0.14);
+    --pd-warning-border: rgba(242, 184, 75, 0.42);
+
+    --pd-danger: #f05d64;
+    --pd-danger-hover: #d94b53;
+    --pd-danger-active: #bd3d46;
+    --pd-danger-soft: rgba(240, 93, 100, 0.14);
+    --pd-danger-soft-hover: rgba(240, 93, 100, 0.24);
+    --pd-danger-border: rgba(240, 93, 100, 0.42);
+
+    /* Folders — amber/gold (distinct from UI accent) */
+    --pd-folder: #a88f00;
+    --pd-folder-hover: #b89a12;
+    --pd-folder-active: #f0d400;
+    --pd-folder-text: #ffffff;
+    --pd-folder-text-active: #fffef2;
+    --pd-folder-glow: rgba(240, 212, 0, 0.28);
+    --pd-folder-border: rgba(142, 116, 0, 0.28);
+    --pd-folder-dot-ring: rgba(142, 116, 0, 0.22);
+
+    --pd-border: rgba(168, 180, 198, 0.18);
+    --pd-border-strong: rgba(168, 180, 198, 0.34);
+    --pd-border-subtle: rgba(168, 180, 198, 0.10);
+    --pd-surface-translucent: rgba(23, 36, 58, 0.72);
+    --pd-surface-translucent-hover: rgba(29, 45, 71, 0.90);
+    --pd-shadow-color: rgba(0, 0, 0, 0.24);
+    --pd-shadow-color-soft: rgba(0, 0, 0, 0.12);
+    --pd-shadow-color-strong: rgba(0, 0, 0, 0.42);
+    --pd-inset-color: rgba(0, 0, 0, 0.20);
+    --pd-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.24);
+    --pd-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.28);
+    --pd-shadow-lg: 0 18px 60px rgba(0, 0, 0, 0.42);
+    --pd-inset: inset 0 -1px 0 rgba(0, 0, 0, 0.20);
+
+    --pd-form-width: 600px;
+    --pd-form-card-width: 640px;
+    --pd-input-max-width: 676px;
+    --pd-auth-card-pad-x: 14px;
+    --pd-auth-btn-col: 168px;
+
+    --pd-btn-shine: rgba(255, 255, 255, 0.10);
+    --pd-btn-shine-strong: rgba(255, 255, 255, 0.24);
+    --pd-motion-fast: 0.16s;
+    --pd-motion-normal: 0.28s;
+    --pd-motion-slow: 0.55s;
+}
+
+/*
+ * Coral — warm dark shell.
+ * Accent = coral/orange (logo, primary, focus).
+ * Danger = crimson (delete) — hue separated from accent.
+ */
+html[data-theme='coral'] {
+    color-scheme: dark;
+
+    --pd-bg: #120c0e;
+    --pd-bg-end: #2c1519;
+    --pd-bg-gradient: linear-gradient(135deg, var(--pd-bg) 0%, var(--pd-bg-end) 100%);
+    --pd-surface: #1a1114;
+    --pd-surface-raised: #24171b;
+    --pd-surface-hover: #2e1d22;
+    --pd-surface-active: #3a252b;
+    --pd-input: #3a2a30;
+    --pd-input-muted: #46353b;
+    --pd-overlay: rgba(10, 4, 6, 0.74);
+
+    --pd-text: #faf4f3;
+    --pd-text-muted: #c4b0b2;
+    --pd-text-subtle: #8f7a7d;
+    --pd-text-on-accent: #1a0c08;
+    --pd-text-disabled: rgba(196, 176, 178, 0.48);
+
+    /* Accent — coral (not delete-red) */
+    --pd-accent: #ff8a5c;
+    --pd-accent-hover: #ff9f78;
+    --pd-accent-active: #e8744a;
+    --pd-accent-soft: rgba(255, 138, 92, 0.16);
+    --pd-accent-soft-hover: rgba(255, 138, 92, 0.26);
+    --pd-accent-border: rgba(255, 138, 92, 0.55);
+    --pd-accent-glow: rgba(255, 138, 92, 0.30);
+    --pd-focus-ring: 0 0 0 3px rgba(255, 138, 92, 0.28);
+    --pd-shadow-accent: 0 2px 10px rgba(255, 138, 92, 0.30);
+
+    /* Danger — crimson, clearly destructive */
+    --pd-danger: #e03d4a;
+    --pd-danger-hover: #c93440;
+    --pd-danger-active: #a82c36;
+    --pd-danger-soft: rgba(224, 61, 74, 0.16);
+    --pd-danger-soft-hover: rgba(224, 61, 74, 0.26);
+    --pd-danger-border: rgba(224, 61, 74, 0.48);
+
+    --pd-border: rgba(196, 176, 178, 0.18);
+    --pd-border-strong: rgba(196, 176, 178, 0.34);
+    --pd-border-subtle: rgba(196, 176, 178, 0.10);
+    --pd-surface-translucent: rgba(36, 23, 27, 0.78);
+    --pd-surface-translucent-hover: rgba(46, 29, 34, 0.92);
+    --pd-shadow-color: rgba(0, 0, 0, 0.30);
+    --pd-shadow-color-soft: rgba(0, 0, 0, 0.16);
+    --pd-shadow-color-strong: rgba(0, 0, 0, 0.48);
+    --pd-inset-color: rgba(0, 0, 0, 0.24);
+    --pd-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.28);
+    --pd-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.34);
+    --pd-shadow-lg: 0 18px 60px rgba(0, 0, 0, 0.48);
+    --pd-inset: inset 0 -1px 0 rgba(0, 0, 0, 0.24);
+}
+
+/* Light — neutral cool gray shell + blue accent */
+html[data-theme='light'] {
+    color-scheme: light;
+
+    --pd-bg: #dfe5ee;
+    --pd-bg-end: #f3f5f8;
+    --pd-bg-gradient: linear-gradient(135deg, var(--pd-bg) 0%, var(--pd-bg-end) 100%);
+    --pd-surface: #ffffff;
+    --pd-surface-raised: #ffffff;
+    --pd-surface-hover: #eef1f6;
+    --pd-surface-active: #e4e9f1;
+    --pd-input: #ffffff;
+    --pd-input-muted: #f0f3f7;
+    --pd-overlay: rgba(15, 23, 42, 0.42);
+
+    --pd-text: #1a2332;
+    --pd-text-muted: #5a6a7e;
+    --pd-text-subtle: #7a8a9e;
+    --pd-text-on-accent: #ffffff;
+    --pd-text-disabled: rgba(90, 106, 126, 0.45);
+
+    --pd-accent: #3d6fd9;
+    --pd-accent-hover: #5284e8;
+    --pd-accent-active: #335cb8;
+    --pd-accent-soft: rgba(61, 111, 217, 0.12);
+    --pd-accent-soft-hover: rgba(61, 111, 217, 0.20);
+    --pd-accent-border: rgba(61, 111, 217, 0.45);
+    --pd-accent-glow: rgba(61, 111, 217, 0.22);
+    --pd-focus-ring: 0 0 0 3px rgba(61, 111, 217, 0.22);
+    --pd-shadow-accent: 0 2px 10px rgba(61, 111, 217, 0.22);
+
+    --pd-success: #1faa5c;
+    --pd-success-hover: #18964f;
+    --pd-success-active: #147a41;
+    --pd-success-soft: rgba(31, 170, 92, 0.12);
+    --pd-success-border: rgba(31, 170, 92, 0.38);
+
+    --pd-warning: #c98a12;
+    --pd-warning-hover: #b07810;
+    --pd-warning-soft: rgba(201, 138, 18, 0.12);
+    --pd-warning-border: rgba(201, 138, 18, 0.38);
+
+    --pd-danger: #d63b45;
+    --pd-danger-hover: #bf333c;
+    --pd-danger-active: #a02b32;
+    --pd-danger-soft: rgba(214, 59, 69, 0.12);
+    --pd-danger-soft-hover: rgba(214, 59, 69, 0.20);
+    --pd-danger-border: rgba(214, 59, 69, 0.42);
+
+    --pd-folder: #9a8200;
+    --pd-folder-hover: #ad9308;
+    --pd-folder-active: #c9a800;
+    --pd-folder-text: #ffffff;
+    --pd-folder-text-active: #1a1600;
+    --pd-folder-glow: rgba(201, 168, 0, 0.28);
+    --pd-folder-border: rgba(154, 130, 0, 0.35);
+    --pd-folder-dot-ring: rgba(154, 130, 0, 0.28);
+
+    --pd-border: rgba(26, 35, 50, 0.14);
+    --pd-border-strong: rgba(26, 35, 50, 0.28);
+    --pd-border-subtle: rgba(26, 35, 50, 0.08);
+    --pd-surface-translucent: rgba(255, 255, 255, 0.86);
+    --pd-surface-translucent-hover: rgba(255, 255, 255, 0.96);
+    --pd-shadow-color: rgba(15, 23, 42, 0.12);
+    --pd-shadow-color-soft: rgba(15, 23, 42, 0.06);
+    --pd-shadow-color-strong: rgba(15, 23, 42, 0.22);
+    --pd-inset-color: rgba(15, 23, 42, 0.08);
+    --pd-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
+    --pd-shadow-md: 0 8px 24px rgba(15, 23, 42, 0.12);
+    --pd-shadow-lg: 0 18px 60px rgba(15, 23, 42, 0.18);
+    --pd-inset: inset 0 -1px 0 rgba(15, 23, 42, 0.06);
+
+    --pd-btn-shine: rgba(255, 255, 255, 0.22);
+    --pd-btn-shine-strong: rgba(255, 255, 255, 0.40);
+}

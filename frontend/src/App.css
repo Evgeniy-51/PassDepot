@@ -1,0 +1,2790 @@
+html,
+body {
+    height: 100%;
+    overflow: hidden;
+}
+
+.wrap {
+    height: 100vh;
+    overflow: hidden;
+    padding: 16px 24px 32px;
+    max-width: 1100px;
+    margin: 0 auto;
+    text-align: left;
+    color: var(--pd-text);
+    font-family: system-ui, Segoe UI, sans-serif;
+    background: var(--pd-bg);
+}
+
+.wrap.auth {
+    padding: 0;
+    max-width: none;
+    margin: 0;
+    background: var(--pd-bg-gradient);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+    position: relative;
+}
+
+.wrap.vaultApp {
+    background: var(--pd-bg-gradient);
+    padding: 0;
+    max-width: none;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Как у .authMain: отступы от краёв и центрирование «карточки» */
+.vaultMain {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 6px 12px 12px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.hdr {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.hdr h1 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 600;
+}
+
+/* Выше по специфичности, чем .hdr h1 — иначе Keania не применяется */
+.hdr h1.logo {
+    font-family: "Keania One", system-ui, sans-serif;
+    font-size: 42px;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    line-height: 1.05;
+    color: var(--pd-accent);
+}
+
+.wrap.auth .authStack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: 0;
+    padding: 24px 16px 16px;
+    box-sizing: border-box;
+    /* Чуть выше геометрического центра оставшейся области */
+    transform: translateY(-18px);
+}
+
+.wrap.auth .authHdr {
+    height: auto;
+    justify-content: center;
+    align-items: baseline;
+    gap: 10px;
+    padding: 0;
+    margin: 0 0 28px;
+    width: 100%;
+}
+
+.wrap.auth .hdr h1.logo {
+    font-size: 59px;
+    letter-spacing: 0.7px;
+    line-height: 1;
+}
+
+.wrap.auth .appVersion {
+    margin-left: 0;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--pd-text-subtle);
+    letter-spacing: 0.02em;
+    user-select: none;
+    transform: translateY(-4px);
+}
+
+.wrap.auth .authMain {
+    flex: 0 0 auto;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0;
+}
+
+.wrap.auth .authFooter {
+    --auth-footer-btn-w: 8.4rem;
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 16px 18px;
+    box-sizing: border-box;
+}
+
+.wrap.auth .authFooterBtn {
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
+    padding: 4px 10px;
+    border: 1px solid var(--pd-border);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--pd-text-subtle);
+    font: inherit;
+    font-size: 12px;
+    line-height: 1.2;
+    cursor: default;
+    box-sizing: border-box;
+    width: var(--auth-footer-btn-w);
+    min-width: var(--auth-footer-btn-w);
+    max-width: var(--auth-footer-btn-w);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wrap.auth .authFooterBtn:not(:disabled) {
+    cursor: pointer;
+    color: var(--pd-text-muted);
+}
+
+.wrap.auth .authFooterBtn:not(:disabled):hover {
+    color: var(--pd-text);
+    border-color: var(--pd-border-strong);
+    background: var(--pd-surface-hover);
+}
+
+.wrap.auth .authLocaleFlag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 16px;
+    width: 16px;
+    height: 12px;
+    line-height: 0;
+}
+
+.wrap.auth .authLocaleFlag svg {
+    display: block;
+    width: 16px;
+    height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.wrap.auth .authLocaleName {
+    line-height: 1.2;
+    /* слот под более длинное «Русский», чтобы внутри не прыгал флаг */
+    min-width: 4.75em;
+    text-align: left;
+}
+
+.wrap.auth > .errGlobal,
+.wrap.auth > .ok {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    width: min(var(--pd-form-card-width), calc(100vw - 32px));
+    box-sizing: border-box;
+    margin: 0;
+}
+
+.authHdr {
+    height: 64px;
+    padding: 14px 26px;
+    margin: 0;
+    align-items: center;
+    background: transparent;
+}
+
+.authMain {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px 12px;
+}
+
+.meta {
+    font-size: 0.75rem;
+    opacity: 0.65;
+}
+
+.bstamp {
+    font-size: 11px;
+    opacity: 0.35;
+    margin-left: 10px;
+    user-select: none;
+}
+
+.err {
+    background: var(--pd-danger-soft);
+    border: 1px solid var(--pd-danger-border);
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+}
+
+.errGlobal {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    padding: 8px 10px;
+}
+
+.errGlobalBody {
+    flex: 1;
+    min-width: 0;
+    max-height: min(7.5rem, 26vh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    word-break: break-word;
+    line-height: 1.35;
+    font-size: 0.88rem;
+}
+
+.errDismiss {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    margin: -2px -4px 0 0;
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    background: var(--pd-danger-soft);
+    color: var(--pd-danger-active);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+}
+
+.errDismiss:hover {
+    background: var(--pd-danger-soft-hover);
+}
+
+.wrap.vaultApp > .errGlobal {
+    margin: 0 10px 6px;
+    flex-shrink: 0;
+}
+
+.wrap.auth > .errGlobal {
+    flex-shrink: 0;
+}
+
+.err.soft {
+    background: var(--pd-surface-hover);
+    border-color: var(--pd-border);
+}
+
+.ok {
+    background: var(--pd-success-soft);
+    border: 1px solid var(--pd-success-border);
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+}
+
+.hint {
+    font-size: 0.85rem;
+    opacity: 0.8;
+    margin: 0 0 8px;
+    line-height: 1.4;
+}
+
+.h2sp {
+    margin-top: 12px;
+}
+
+.inp.ta {
+    max-width: none;
+    width: 100%;
+    min-height: 72px;
+    resize: none;
+    overflow: auto;
+    font-family: ui-monospace, Consolas, monospace;
+    font-size: 0.85rem;
+}
+
+.panel {
+    background: var(--pd-surface-raised);
+    border: 1px solid var(--pd-border);
+    border-radius: 8px;
+    padding: 12px;
+    height: calc(100vh - 110px);
+    overflow: auto;
+}
+
+.authCard {
+    width: min(var(--pd-form-card-width), calc(100vw - 32px));
+    margin: 0;
+    height: auto;
+    overflow: visible;
+    border-radius: 14px;
+    background: var(--pd-surface);
+    border-color: var(--pd-border-subtle);
+    padding: 26px var(--pd-auth-card-pad-x) 28px;
+}
+
+.authCardAdd {
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 14px var(--pd-auth-card-pad-x) 14px;
+}
+
+.authFormAdd {
+    padding-bottom: 2px;
+    --add-inp-h: 30px;
+}
+
+.authAddHdr {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 0 0 12px;
+}
+
+.authAddTabs {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    min-width: 0;
+    flex: 1 1 auto;
+    border-bottom: 1px solid var(--pd-border-subtle);
+}
+
+.authAddTab {
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
+    padding: 6px 12px 8px;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    background: transparent;
+    color: var(--pd-text-muted);
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.authAddTab:hover:not(:disabled) {
+    color: var(--pd-text);
+}
+
+.authAddTab--active {
+    color: var(--pd-text);
+    border-bottom-color: var(--pd-accent);
+}
+
+.authAddTab:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.authAddClose {
+    flex: 0 0 auto;
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+    line-height: 26px;
+    border-radius: 8px;
+}
+
+.authAddClose:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.authAddImportPane {
+    padding-top: 2px;
+}
+
+.authFormAdd .authBusyBanner {
+    margin: 0 0 10px;
+    padding: 8px 10px;
+    font-size: 13px;
+    gap: 8px;
+}
+
+.authFormAdd .h3 {
+    margin: 4px 0 2px;
+    font-size: 0.88rem;
+}
+
+.authFormAdd .hint {
+    margin: 0 0 6px;
+    font-size: 0.75rem;
+    line-height: 1.3;
+    opacity: 0.75;
+}
+
+.authImportList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0 0 6px;
+}
+
+.authImportRow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+}
+
+.authFormAdd .authImportBtn {
+    margin: 0;
+    flex: 0 0 auto;
+    min-width: 168px;
+}
+
+.authImportHint {
+    flex: 1 1 180px;
+    margin: 0;
+    font-size: 0.72rem;
+    font-weight: 400;
+    line-height: 1.3;
+    color: var(--pd-text-subtle);
+}
+
+.authImportMoreBtn {
+    appearance: none;
+    -webkit-appearance: none;
+    display: block;
+    width: fit-content;
+    margin: 4px 0 6px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--pd-text-muted);
+    font: inherit;
+    font-size: 0.78rem;
+    cursor: pointer;
+    text-align: left;
+}
+
+.authImportMoreBtn:hover:not(:disabled) {
+    color: var(--pd-text);
+}
+
+.authImportMoreBtn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.authImportMore {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 4px;
+}
+
+.authFormAdd .lbl {
+    margin: 2px 0 2px;
+    font-size: 0.74rem;
+    opacity: 0.8;
+}
+
+.authFormAdd .fieldHint {
+    margin: 0;
+    padding: 0;
+    font-size: inherit;
+    font-weight: 400;
+    line-height: inherit;
+    color: var(--pd-text-subtle);
+    white-space: nowrap;
+}
+
+.authFormAdd .lblWithHint {
+    white-space: nowrap;
+}
+
+.authFormAdd .inp {
+    padding: 5px 8px;
+    margin-bottom: 4px;
+    font-size: 13px;
+    border-radius: 6px;
+    height: var(--add-inp-h);
+    box-sizing: border-box;
+}
+
+.authFormAdd .inp.ta.authImportTa {
+    margin-bottom: 6px;
+    font-size: 0.8rem;
+    line-height: 1.35;
+    resize: none;
+    width: 100%;
+    max-width: none;
+}
+
+.authFormAdd .inp.ta.authImportTa[data-expanded='0'] {
+    height: calc(var(--add-inp-h) * 1.5);
+    min-height: calc(var(--add-inp-h) * 1.5);
+    max-height: calc(var(--add-inp-h) * 1.5);
+    overflow-y: auto;
+}
+
+.authFormAdd .inp.ta.authImportTa[data-expanded='1'] {
+    height: auto;
+    min-height: 160px;
+    max-height: none;
+    overflow-y: auto;
+}
+
+.authFormAdd .passWrap {
+    margin-bottom: 4px;
+    max-width: var(--pd-input-max-width);
+}
+
+.authFormAdd .passWrap .passInp {
+    margin-bottom: 0;
+    height: var(--add-inp-h);
+    min-height: var(--add-inp-h);
+    padding: 5px 36px 5px 8px;
+    font-size: 13px;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+.authFormAdd .passWrap .passToggle {
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    min-height: 22px;
+    right: 5px;
+}
+
+.authFormAdd .passWrap .passToggle svg {
+    width: 13px;
+    height: 13px;
+}
+
+.authGitBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 10px 0 8px;
+    padding: 10px 10px 6px;
+    border: 1px solid var(--pd-border);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--pd-surface) 70%, transparent);
+}
+
+.authGitFields {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    transition: opacity 0.15s ease, filter 0.15s ease;
+}
+
+.authGitFields--inactive {
+    opacity: 0.48;
+    filter: saturate(0.65);
+}
+
+.authFormAdd .authGitFields .lbl {
+    margin-top: 4px;
+}
+
+.authFormAdd .authGitFields .inp,
+.authFormAdd .authGitFields .passWrap {
+    margin-bottom: 6px;
+}
+
+.storageModeRow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 18px;
+    margin: 0 0 8px;
+}
+
+.storageModeOpt {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    color: var(--pd-text);
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.25;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.storageModeOpt input {
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    flex-shrink: 0;
+    accent-color: var(--pd-accent);
+}
+
+.storageModeOpt:has(input:disabled) {
+    cursor: default;
+}
+
+.authFormAdd .row {
+    margin-bottom: 6px;
+    gap: 6px;
+}
+
+.authFormAdd .row.authCreateActions {
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.authFormAdd .authCreateHelpBtn {
+    margin-left: auto;
+    margin-right: 0;
+}
+
+.authFormAdd .btn {
+    margin-top: 0;
+    margin-right: 6px;
+    padding: 5px 10px;
+    font-size: 13px;
+    border-radius: 6px;
+}
+
+.authFormAdd .hr {
+    margin: 10px 0;
+}
+
+.authForm {
+    max-width: var(--pd-form-width);
+    margin: 0 auto;
+    --authRowH: 42px;
+}
+
+.authBusyBanner {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 0 0 18px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--pd-accent-hover);
+    font-weight: 600;
+    background: var(--pd-accent-soft);
+    border: 1px solid var(--pd-accent-border);
+}
+
+.authSpinner {
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    flex-shrink: 0;
+    border: 2px solid var(--pd-accent-glow);
+    border-top-color: var(--pd-accent);
+    border-radius: 50%;
+    animation: authSpinnerRot 0.65s linear infinite;
+}
+
+@keyframes authSpinnerRot {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.albl {
+    display: block;
+    font-size: 16px;
+    color: var(--pd-text-muted);
+    margin: 0 0 6px;
+}
+
+.ainp {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 2px solid var(--pd-border);
+    background: var(--pd-input);
+    color: var(--pd-text);
+    font-size: 16px;
+    outline: none;
+    margin-bottom: 18px;
+}
+
+.ainp:focus {
+    border-color: var(--pd-accent);
+    box-shadow: var(--pd-focus-ring);
+}
+
+.selectWrap {
+    position: relative;
+    margin-bottom: 18px;
+}
+
+.selectWrap .ainpSelect {
+    appearance: none;
+    -webkit-appearance: none;
+    margin-bottom: 0;
+    padding-right: 52px;
+    cursor: pointer;
+}
+
+.selectWrap::after {
+    content: "";
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    width: 22px;
+    height: 22px;
+    transform: translateY(-50%);
+    background: currentColor;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") center / contain no-repeat;
+    pointer-events: none;
+}
+
+.selectWrap .ainpSelect:disabled {
+    cursor: not-allowed;
+    opacity: 0.75;
+}
+
+.authRow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--pd-auth-btn-col);
+    gap: 10px 12px;
+    align-items: end;
+    margin-bottom: 18px;
+}
+
+.authRowMain {
+    min-width: 0;
+}
+
+.authRowMain .albl {
+    margin-bottom: 6px;
+}
+
+.authRowMain .ainp,
+.authRowMain .selectWrap {
+    margin-bottom: 0;
+}
+
+.authRowSelect {
+    margin-bottom: 0;
+}
+
+.authRow.authRowLogin {
+    margin-bottom: 0;
+}
+
+.abtnRow {
+    margin: 0;
+    width: 100%;
+    height: var(--authRowH);
+    min-height: var(--authRowH);
+    align-self: end;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    white-space: nowrap;
+}
+
+.abtnLogin {
+    min-width: 0;
+}
+
+.authPatMissing {
+    margin: 0 0 18px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: var(--pd-warning-soft);
+    border: 1px solid var(--pd-warning-border);
+}
+
+.authPatMissingTxt {
+    margin: 0 0 12px;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--pd-text);
+}
+
+.authPatRow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--pd-auth-btn-col);
+    gap: 10px;
+    align-items: stretch;
+}
+
+.authPatRow .passWrap,
+.authRowMain .passWrap {
+    height: var(--authRowH);
+}
+
+.authPatRow .passWrap .passInp,
+.authRowMain .passWrap .passInp {
+    height: 100%;
+    min-height: var(--authRowH);
+}
+
+.authPatInp {
+    margin-bottom: 0;
+    height: var(--authRowH);
+    min-height: var(--authRowH);
+    box-sizing: border-box;
+}
+
+.abtnPat {
+    margin: 0;
+    width: 100%;
+    height: var(--authRowH);
+    min-height: var(--authRowH);
+    align-self: stretch;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    font-size: 15px;
+}
+
+.abtnDanger {
+    background: var(--pd-danger-soft);
+    border-color: var(--pd-danger-border);
+    color: var(--pd-danger);
+}
+
+.abtnDanger:hover:not(:disabled) {
+    background: var(--pd-danger-soft);
+    border-color: var(--pd-danger-border);
+}
+
+.authRow .ainpGrow {
+    margin-bottom: 0;
+    height: var(--authRowH);
+    min-height: var(--authRowH);
+    align-self: stretch;
+    box-sizing: border-box;
+}
+
+.abtn {
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 16px;
+}
+
+.abtn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.panel.vault {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    width: min(980px, calc(100vw - 24px));
+    margin: 0 auto;
+    background: var(--pd-surface);
+    border: 1px solid var(--pd-border-subtle);
+    border-radius: 14px;
+    /* Боковые отступы ≈ нижнему, без широких полей */
+    padding: 12px 14px 14px;
+    box-sizing: border-box;
+}
+
+.vaultBoard {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 4px 6px 6px 6px;
+    border-radius: 14px;
+    background: var(--pd-surface-raised);
+    border: 1px solid var(--pd-border-subtle);
+    box-sizing: border-box;
+    --rowH: 28px;
+    --iconH: 28px;
+}
+
+.vaultBoardMain {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: 1fr;
+    gap: 14px;
+    align-content: stretch;
+}
+
+.vaultBoard,
+.vaultBoard * {
+    box-sizing: border-box;
+}
+
+.folders {
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+    min-width: 0;
+}
+
+.fbtnLabel {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fRow > .fbtn {
+    min-width: 0;
+}
+
+.descPane {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+    min-width: 0;
+}
+
+.descPaneHint {
+    margin: auto 8px;
+    font-size: 13px;
+    color: var(--pd-text-subtle);
+    text-align: center;
+}
+
+.descNewBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.descNewLabel {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--pd-text-muted);
+}
+
+.descTitleInp {
+    width: 100%;
+}
+
+.descNewActions {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+}
+
+.dList {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    scroll-padding-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-right: 4px;
+    padding-bottom: 4px;
+}
+
+.dRow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--iconH);
+    gap: 10px;
+    align-items: center;
+    min-width: 0;
+}
+
+/* Описания: тон как у панели vault, не как чёрный фон окна */
+.dbtn {
+    border: 1px solid var(--pd-border);
+    border-radius: 9px;
+    padding: 3px 10px;
+    font-size: 13px;
+    background: var(--pd-surface);
+    color: var(--pd-text);
+    cursor: pointer;
+    text-align: left;
+    box-shadow: var(--pd-shadow-sm);
+    min-height: var(--rowH);
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    line-height: 1.15;
+    position: relative;
+}
+
+.dbtn:hover {
+    background: var(--pd-surface-hover);
+    border-color: var(--pd-border-strong);
+}
+
+.dbtn.active {
+    background: var(--pd-accent);
+    color: var(--pd-text-on-accent);
+    padding-left: 22px;
+    border-color: var(--pd-border-strong);
+    box-shadow: var(--pd-shadow-accent), var(--pd-inset);
+    outline: 2px solid var(--pd-accent-border);
+}
+
+.dbtn.active::before {
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    margin-top: -4px;
+    border-radius: 999px;
+    background: var(--pd-text-on-accent);
+    box-shadow: 0 0 0 2px var(--pd-accent-glow);
+}
+
+.dbtnLabel {
+    display: block;
+    min-width: 0;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dtrash {
+    height: var(--rowH);
+    display: grid;
+    place-items: center;
+}
+
+/* DescDetailPanel в модалке (не в сетке доски) */
+.descDetail--inModal {
+    border-top: none;
+    padding-top: 0;
+}
+
+.descVaultModal {
+    z-index: 55;
+}
+
+.sheetDesc {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    top: min(10vh, 80px);
+    width: min(520px, calc(100vw - 28px));
+    max-height: min(720px, calc(92vh - 24px));
+}
+
+.descModalNew {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.descNotesBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.descNewOpenBtn {
+    width: 100%;
+    flex-shrink: 0;
+}
+
+.descModalFooter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--pd-border-subtle);
+}
+
+.descDetail {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.descDetailHeading {
+    display: none;
+}
+
+.descDetailField {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px 10px;
+    align-items: start;
+    padding: 8px 6px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+}
+
+.descDetailFieldVal {
+    align-items: start;
+}
+
+.descDetailFieldVal .descNotesLbl {
+    grid-column: 1 / -1;
+}
+
+.descNotesLbl {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--pd-text-muted);
+    line-height: 1.3;
+}
+
+.fieldHint {
+    margin: 0;
+    padding: 0;
+    font-size: inherit;
+    font-weight: 400;
+    line-height: inherit;
+    color: var(--pd-text-subtle);
+}
+
+.descDetailFieldDraft {
+    border-color: var(--pd-warning);
+    background: var(--pd-warning-soft);
+}
+
+.descFieldLbl {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--pd-text-muted);
+    padding-top: 6px;
+    word-break: break-word;
+}
+
+.descDetail textarea.einpValTex[data-expanded='0'],
+.descModalNew textarea.einpValTex[data-expanded='0'] {
+    min-height: calc(var(--rowH) * 1.5);
+    max-height: calc(var(--rowH) * 1.5);
+    height: calc(var(--rowH) * 1.5);
+    overflow-y: auto;
+}
+
+.descFieldActions {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding-top: 2px;
+}
+
+.fRow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--rowH);
+    gap: 8px;
+    align-items: center;
+    min-height: var(--rowH);
+}
+
+.fbtnMore {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid var(--pd-border);
+    border-radius: 8px;
+    background: var(--pd-surface-translucent);
+    color: var(--pd-text-muted);
+    cursor: pointer;
+    height: var(--rowH);
+    width: var(--rowH);
+    margin: 0;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    font-size: 17px;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    box-shadow: 0 1px 2px var(--pd-shadow-color-soft);
+}
+
+.fbtnMore:hover {
+    background: var(--pd-surface-translucent-hover);
+    border-color: var(--pd-border-strong);
+    color: var(--pd-text);
+}
+
+.fbtnMore[aria-expanded='true'] {
+    background: var(--pd-surface-raised);
+    border-color: var(--pd-accent-border);
+    outline: 2px solid var(--pd-accent-glow);
+}
+
+.folderMenuBackdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+    background: transparent;
+}
+
+.folderMenu {
+    position: fixed;
+    z-index: 46;
+    min-width: 172px;
+    padding: 4px;
+    background: var(--pd-surface-raised);
+    border: 1px solid var(--pd-border);
+    border-radius: 10px;
+    box-shadow: 0 10px 32px var(--pd-shadow-color);
+    box-sizing: border-box;
+}
+
+.folderMenuItem {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    font-size: 13px;
+    color: var(--pd-text);
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.folderMenuItem:hover {
+    background: var(--pd-surface-hover);
+}
+
+.folderMenuItemDanger {
+    color: var(--pd-danger);
+}
+
+.folderMenuItemDanger:hover {
+    background: var(--pd-danger-soft);
+}
+
+.fList {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    scroll-padding-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-right: 4px;
+    padding-bottom: 4px;
+}
+
+.fbtn {
+    border: none;
+    border-radius: 9px;
+    padding: 3px 10px;
+    font-size: 13px;
+    background: var(--pd-folder);
+    color: var(--pd-folder-text);
+    cursor: pointer;
+    text-align: center;
+    box-shadow: 0 1px 0 var(--pd-shadow-color-soft), inset 0 -1px 0 var(--pd-inset-color);
+    height: var(--rowH);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    position: relative;
+}
+
+.fbtn.add {
+    background: var(--pd-accent);
+    color: var(--pd-text-on-accent);
+}
+
+.fRowCreate {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--rowH) var(--rowH);
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.folderCreateInp {
+    width: 100%;
+    min-width: 0;
+    height: var(--rowH);
+    margin: 0;
+}
+
+.fRow > .iconBtn {
+    align-self: center;
+    justify-self: center;
+}
+
+/* Кнопки действий в строке записи — по верху, когда значение многострочное */
+.newRow > .iconBtn,
+.eRow > .iconBtn {
+    align-self: start;
+    justify-self: center;
+}
+
+.fbtn:hover {
+    filter: brightness(1.04);
+}
+
+.fbtn.active {
+    background: var(--pd-folder-active);
+    color: var(--pd-folder-text-active);
+    box-shadow: 0 2px 10px var(--pd-folder-glow), inset 0 -1px 0 var(--pd-shadow-color-soft);
+    outline: 2px solid var(--pd-folder-border);
+}
+
+.fbtn.active::before {
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    margin-top: -4px;
+    border-radius: 999px;
+    background: var(--pd-folder-text-active);
+    box-shadow: 0 0 0 2px var(--pd-folder-dot-ring);
+}
+
+.entries {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 0;
+}
+
+.newRow {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr) var(--rowH) var(--rowH);
+    gap: 12px;
+    align-items: start;
+}
+
+.eList {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    scroll-padding-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-right: 4px;
+    padding-bottom: 4px;
+}
+
+.eRow {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr) auto;
+    gap: 12px;
+    align-items: start;
+}
+
+.eRowActions {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: flex-start;
+    justify-content: flex-end;
+}
+
+.eRowDraft textarea.einpValTex {
+    border-color: var(--pd-warning);
+    background: var(--pd-warning-soft);
+}
+
+.einp {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 2px solid var(--pd-text-muted);
+    background: var(--pd-input);
+    color: var(--pd-text);
+    font-size: 13px;
+    height: var(--rowH);
+    line-height: 1;
+}
+
+textarea.einpValTex {
+    height: auto;
+    min-height: var(--rowH);
+    line-height: 1.35;
+    font-family: inherit;
+    resize: none;
+    display: block;
+}
+
+textarea.einpValTex[data-expanded='0'] {
+    overflow-y: hidden;
+    max-height: var(--rowH);
+}
+
+textarea.einpValTex[data-expanded='1'] {
+    overflow-y: auto;
+    max-height: none;
+}
+
+.einp.key {
+    background: var(--pd-input-muted);
+}
+
+.einp[readonly] {
+    opacity: 0.95;
+}
+
+.einp:focus,
+.inp:focus {
+    border-color: var(--pd-accent);
+    box-shadow: var(--pd-focus-ring);
+    outline: none;
+}
+
+.valWrap {
+    position: relative;
+    display: flex;
+    min-width: 0;
+}
+
+.valWrapKey {
+    align-items: center;
+}
+
+.valWrapVal {
+    align-items: flex-start;
+}
+
+.valWrap .einp.val,
+.valWrap .einpValTex {
+    padding-right: 34px;
+}
+
+.valWrap .einp.key {
+    padding-right: 34px;
+}
+
+.valWrap .iconBtn.mini {
+    position: absolute;
+    right: 5px;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+    padding: 0;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.valWrap .iconBtn.mini svg {
+    width: 12px;
+    height: 12px;
+}
+
+.valWrapKey .iconBtn.mini {
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.valWrapVal .iconBtn.mini {
+    top: 4px;
+    transform: none;
+    margin-top: 0;
+}
+
+.iconBtn {
+    appearance: none;
+    -webkit-appearance: none;
+    border: none;
+    background: var(--pd-surface-hover);
+    border-radius: 8px;
+    padding: 4px;
+    cursor: pointer;
+    color: var(--pd-text);
+    height: var(--rowH);
+    width: var(--rowH);
+    margin: 0;
+    display: grid;
+    place-items: center;
+    line-height: 1;
+    vertical-align: middle;
+}
+
+.iconBtn.mini {
+    height: var(--iconH);
+    width: var(--iconH);
+    padding: 4px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+}
+
+.iconBtn svg {
+    display: block;
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+}
+
+.iconBtn:hover {
+    background: var(--pd-border);
+}
+
+.iconBtn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.iconBtn.ok {
+    background: var(--pd-success);
+    color: var(--pd-text-on-accent);
+}
+
+.iconBtn.ok:hover {
+    background: var(--pd-success-hover);
+}
+
+.iconBtn.danger {
+    background: var(--pd-danger);
+    color: var(--pd-text-on-accent);
+}
+
+.iconBtn.danger:hover {
+    background: var(--pd-danger-hover);
+}
+
+.iconBtn.danger.ftrash svg,
+.iconBtn.danger.dtrash svg {
+    width: 15px;
+    height: 15px;
+}
+
+.panel h2 {
+    margin: 0 0 12px;
+    font-size: 1.05rem;
+}
+
+.lbl {
+    display: block;
+    font-size: 0.8rem;
+    margin: 6px 0 4px;
+    opacity: 0.85;
+}
+
+.inp {
+    width: 100%;
+    max-width: var(--pd-input-max-width);
+    box-sizing: border-box;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--pd-border-strong);
+    background: var(--pd-input);
+    color: var(--pd-text);
+    margin-bottom: 4px;
+}
+
+.btn {
+    margin-top: 6px;
+    margin-right: 8px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--pd-border-strong);
+    background: var(--pd-surface-hover);
+    color: var(--pd-text);
+    cursor: pointer;
+}
+
+.btn:hover:not(.pdBtn) {
+    background: var(--pd-border);
+}
+
+.btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.abtn:focus-visible,
+.pdBtn:focus-visible,
+.btn:focus-visible,
+.fbtn:focus-visible,
+.dbtn:focus-visible,
+.passToggle:focus-visible,
+.iconBtn:focus-visible,
+.pbtn:focus-visible,
+.xbtn:focus-visible,
+.folderMenuItem:focus-visible,
+.fbtnMore:focus-visible {
+    outline: 2px solid var(--pd-accent);
+    outline-offset: 2px;
+}
+
+.btn.primary {
+    background: var(--pd-accent);
+    border-color: var(--pd-accent);
+    color: var(--pd-text-on-accent);
+}
+
+.btn.primary:hover:not(.pdBtn) {
+    background: var(--pd-accent-hover);
+}
+
+.btn.danger {
+    border-color: var(--pd-danger-border);
+    background: var(--pd-danger-soft);
+}
+
+.btn.saveVault {
+    background: var(--pd-success-hover);
+    border-color: var(--pd-success-active);
+    color: var(--pd-text-on-accent);
+    font-weight: 600;
+}
+
+.btn.saveVault:hover:not(:disabled) {
+    background: var(--pd-success-active);
+    border-color: var(--pd-success-active);
+}
+
+.btn.saveVault:disabled {
+    background: var(--pd-border);
+    border-color: var(--pd-border-strong);
+    color: var(--pd-text-disabled);
+    font-weight: 500;
+    opacity: 1;
+    cursor: not-allowed;
+}
+
+.btn.sm {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    margin-top: 0;
+}
+
+.hr {
+    border: none;
+    border-top: 1px solid var(--pd-border);
+    margin: 20px 0;
+}
+
+.toolbar {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.toolbarActions {
+    --vaultToolbarRowH: 36px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Одна высота с кнопками: профиль и .btn */
+.toolbarActions .btn {
+    margin-top: 0;
+    margin-bottom: 0;
+    height: var(--vaultToolbarRowH);
+    min-height: var(--vaultToolbarRowH);
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.toolbarActions .btn.tbEq {
+    flex: 0 0 auto;
+    width: 8rem;
+    padding-left: 6px;
+    padding-right: 6px;
+    white-space: nowrap;
+}
+
+.toolbarActions .btn.tbLogout {
+    margin-left: auto;
+}
+
+.toolbarActions .pbtn {
+    height: var(--vaultToolbarRowH);
+    min-height: var(--vaultToolbarRowH);
+    max-width: min(240px, 36vw);
+    min-width: 0;
+    flex: 0 1 auto;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0 10px;
+    gap: 6px;
+    border-radius: 10px;
+}
+
+.toolbarActions .pico {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+}
+
+.toolbarActions .pico svg {
+    width: 15px;
+    height: 15px;
+}
+
+.toolbarActions .ptxt {
+    font-size: 0.8125rem;
+    line-height: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.toolbarStatus {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    padding: 2px 0 0;
+}
+
+.toolbarStatus .warn {
+    flex: 1 1 12rem;
+    min-width: 0;
+    line-height: 1.35;
+}
+
+.toolbarStatus .syncMeta {
+    flex: 0 0 auto;
+    max-width: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.syncBusy {
+    font-size: 13px;
+    color: var(--pd-accent-hover);
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: var(--pd-accent-soft);
+}
+
+.syncMeta {
+    font-size: 12px;
+    color: var(--pd-text-muted);
+    max-width: min(420px, 100%);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Vault: компактнее шапка и строка статуса (~−30% по высоте) → больше места под папки */
+.wrap.vaultApp .authHdr {
+    height: 46px;
+    min-height: 46px;
+    padding: 6px 18px;
+    box-sizing: border-box;
+}
+
+.wrap.vaultApp .hdr h1.logo {
+    font-size: 30px;
+    letter-spacing: 0.35px;
+    line-height: 1;
+}
+
+.wrap.vaultApp .vaultMain {
+    padding: 4px 10px 8px;
+}
+
+.wrap.vaultApp .panel.vault {
+    padding: 8px 12px 10px;
+}
+
+.wrap.vaultApp .toolbar {
+    gap: 5px;
+    margin-bottom: 4px;
+}
+
+.wrap.vaultApp .toolbarActions {
+    --vaultToolbarRowH: 28px;
+}
+
+.wrap.vaultApp .toolbarActions .pico {
+    width: 18px;
+    height: 18px;
+}
+
+.wrap.vaultApp .toolbarActions .pico svg {
+    width: 13px;
+    height: 13px;
+}
+
+.wrap.vaultApp .toolbarActions .ptxt {
+    font-size: 0.75rem;
+}
+
+.wrap.vaultApp .toolbarStatus {
+    padding: 0;
+    gap: 4px 10px;
+}
+
+.wrap.vaultApp .toolbarStatus .warn {
+    font-size: 0.8rem;
+    line-height: 1.25;
+}
+
+.wrap.vaultApp .syncBusy {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 6px;
+}
+
+.wrap.vaultApp .syncMeta,
+.wrap.vaultApp .toolbarStatus .syncMeta {
+    font-size: 11px;
+    line-height: 1.25;
+}
+
+.pbtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--pd-border);
+    background: var(--pd-surface-raised);
+    cursor: pointer;
+    line-height: 1;
+}
+
+.pbtn:hover {
+    background: var(--pd-surface-hover);
+}
+
+.pico {
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    background: var(--pd-accent-soft);
+    color: var(--pd-accent-hover);
+    border: 1px solid var(--pd-accent-border);
+}
+
+.ptxt {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.warn {
+    color: var(--pd-warning);
+    font-size: 0.85rem;
+}
+
+.cols {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 16px;
+    min-height: 0;
+    flex: 1;
+}
+
+@media (max-width: 800px) {
+    .cols {
+        grid-template-columns: 1fr;
+    }
+}
+
+.col h3 {
+    margin: 0 0 8px;
+    font-size: 0.95rem;
+}
+
+.col.wide .row {
+    max-width: none;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.row .inp {
+    flex: 1;
+    min-width: 120px;
+    margin-bottom: 0;
+}
+
+.row.settings {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--pd-border);
+}
+
+.accountProfileRow {
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.accountProfileLbl {
+    flex: 0 0 auto;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--pd-text);
+    line-height: 1.2;
+}
+
+.accountProfileName {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--pd-accent);
+    line-height: 1.2;
+    word-break: break-word;
+}
+
+.accountProfileNameBtn {
+    appearance: none;
+    -webkit-appearance: none;
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--pd-accent);
+    line-height: 1.2;
+    text-align: left;
+    word-break: break-word;
+    cursor: pointer;
+}
+
+.accountProfileNameBtn:hover {
+    color: var(--pd-accent-hover);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.accountProfileEdit {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    width: 100%;
+    max-width: var(--pd-input-max-width);
+    min-width: 0;
+}
+
+.accountProfileRenameInp {
+    width: 100%;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.accountProfileEditActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.accountAutoLockRow {
+    align-items: center;
+    gap: 8px;
+}
+
+.accountAutoLockTxt {
+    flex: 0 0 auto;
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--pd-text);
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.accountAutoLockInp {
+    flex: 0 0 64px;
+    min-width: 64px;
+    width: 64px;
+    height: 32px;
+    margin: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    box-sizing: border-box;
+}
+
+.accountAutoLockBtn {
+    margin: 0;
+    height: 32px;
+    min-height: 32px;
+    padding-top: 0;
+    padding-bottom: 0;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sheetNotifications {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.sheetBanner {
+    margin: 0;
+}
+
+.row.settings.accountSheetFooter {
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+    padding-bottom: 2px;
+}
+
+.inp.narrow {
+    flex: 0 0 72px;
+    min-width: 72px;
+}
+
+.lbl.inline {
+    flex: 0 0 auto;
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.85rem;
+}
+
+.list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow: auto;
+    max-height: calc(100vh - 360px);
+}
+
+.li {
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.li:hover {
+    background: var(--pd-surface-hover);
+}
+
+.li.active {
+    background: var(--pd-accent-soft);
+    border-color: var(--pd-accent);
+}
+
+.tbl {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.tbl th,
+.tbl td {
+    border-bottom: 1px solid var(--pd-border);
+    padding: 8px 6px;
+    vertical-align: top;
+}
+
+.tbl th {
+    text-align: left;
+    font-weight: 600;
+    opacity: 0.85;
+}
+
+.mono {
+    font-family: ui-monospace, Consolas, monospace;
+    word-break: break-all;
+}
+
+.h2inline {
+    margin: 0;
+    font-size: 1.05rem;
+}
+
+.h3 {
+    margin: 0 0 8px;
+    font-size: 0.95rem;
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+}
+
+.backdrop {
+    position: absolute;
+    inset: 0;
+    background: var(--pd-overlay);
+}
+
+.sheet {
+    position: absolute;
+    top: 10px;
+    right: 18px;
+    width: min(720px, calc(100vw - 36px));
+    max-height: calc(100vh - 24px);
+    overflow: auto;
+    scroll-padding-bottom: 20px;
+    background: var(--pd-surface-raised);
+    border: 1px solid var(--pd-border);
+    border-radius: 12px;
+    box-shadow: 0 18px 60px var(--pd-shadow-color-strong);
+    box-sizing: border-box;
+    /* Сверху компактнее; снизу запас, чтобы контент не прилипал к рамке при скролле */
+    padding: 10px 12px 26px 12px;
+}
+
+.sheetHdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 6px;
+}
+
+.sheetTitle {
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.xbtn {
+    border: 1px solid var(--pd-border);
+    background: var(--pd-surface-raised);
+    border-radius: 10px;
+    width: 34px;
+    height: 34px;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 30px;
+}
+
+.xbtn:hover {
+    background: var(--pd-surface-hover);
+}
+
+.sheetAccount {
+    padding: 8px 12px 14px;
+    max-height: calc(100vh - 20px);
+}
+
+.sheetAccount .sheetHdr {
+    margin-bottom: 4px;
+}
+
+.sheetAccount .sheetTitle {
+    font-size: 0.95rem;
+}
+
+.sheetAccount .xbtn {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    font-size: 18px;
+    line-height: 26px;
+}
+
+.sheetAccount .sheetNotifications {
+    gap: 4px;
+    margin-bottom: 6px;
+}
+
+.sheetAccount .err,
+.sheetAccount .ok {
+    padding: 6px 8px;
+    margin-bottom: 0;
+    font-size: 0.82rem;
+}
+
+.sheetAccount .row.settings {
+    margin-top: 6px;
+    padding-top: 6px;
+    gap: 6px;
+}
+
+.sheetAccount .accountProfileLbl,
+.sheetAccount .accountProfileName,
+.sheetAccount .accountProfileNameBtn {
+    font-size: 0.95rem;
+}
+
+.sheetAccount .accountProfileRenameInp {
+    height: 34px;
+    min-height: 34px;
+    padding: 6px 10px;
+    font-size: 0.875rem;
+}
+
+.sheetAccount .accountAutoLockTxt {
+    font-size: 0.8rem;
+}
+
+.sheetAccount .accountAutoLockInp,
+.sheetAccount .accountAutoLockBtn {
+    height: 28px;
+    min-height: 28px;
+}
+
+.sheetAccount .lbl.inline {
+    font-size: 0.78rem;
+    margin: 0;
+}
+
+.sheetAccount .btn {
+    margin-top: 0;
+    margin-right: 6px;
+    padding: 4px 10px;
+    font-size: 0.8rem;
+}
+
+.sheetAccount .inp {
+    padding: 4px 8px;
+    margin-bottom: 0;
+    font-size: 0.8rem;
+    max-width: none;
+}
+
+.sheetAccount .accountPwBlock,
+.sheetAccount .accountPatBlock,
+.sheetAccount .accountRemoteBlock {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+}
+
+.sheetAccount .accountPwFields {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    max-width: var(--pd-input-max-width);
+}
+
+.sheetAccount .inp.accountPwField {
+    width: 100%;
+    max-width: none;
+    height: 34px;
+    min-height: 34px;
+    padding: 6px 10px;
+    font-size: 0.875rem;
+    margin-bottom: 0;
+    box-sizing: border-box;
+}
+
+.sheetAccount .accountPwFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 6px; /* + gap 6 = 12 от последнего поля (= 2×) */
+}
+
+.sheetAccount .accountPwFooter .accountBlockBtn {
+    margin-top: 0;
+}
+
+.sheetAccount .accountShowPw {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding-right: 8px;
+    box-sizing: border-box;
+    font-size: 0.78rem;
+    color: var(--pd-text-muted);
+    cursor: pointer;
+    user-select: none;
+    flex: 0 0 auto;
+}
+
+.sheetAccount .accountShowPw input {
+    margin: 0;
+    accent-color: var(--pd-accent);
+}
+
+.sheetAccount .accountRemoteCurrent {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 8px;
+    font-size: 0.78rem;
+    color: var(--pd-text-muted);
+    line-height: 1.35;
+}
+
+.sheetAccount .accountRemoteCurrentLbl {
+    flex: 0 0 auto;
+    color: var(--pd-text-subtle);
+}
+
+.sheetAccount .accountRemoteLink {
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--pd-accent);
+    font: inherit;
+    font-size: inherit;
+    text-align: left;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+    word-break: break-all;
+}
+
+.sheetAccount .accountRemoteLink:hover {
+    color: var(--pd-accent-hover);
+}
+
+.sheetAccount .accountRemoteBranch {
+    color: var(--pd-text-subtle);
+    white-space: nowrap;
+}
+
+.sheetAccount .accountRemoteField {
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+}
+
+.sheetAccount .accountRemoteBranchInp {
+    max-width: 10rem;
+}
+
+.sheetAccount .accountRemoteHint {
+    margin: 2px 0 0;
+    font-size: 0.72rem;
+    line-height: 1.35;
+    color: var(--pd-text-subtle);
+}
+
+.sheetAccount .accountMigrateWarn {
+    margin-top: 4px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--pd-warning-border);
+    background: var(--pd-warning-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sheetAccount .accountMigrateWarn p {
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.4;
+    color: var(--pd-text);
+}
+
+.modal.accountRemoteConfirmModal {
+    z-index: 60;
+}
+
+.modal.importVaultNameModal {
+    z-index: 75;
+}
+
+.modal.createHelpModal {
+    z-index: 70;
+}
+
+.sheetCreateHelp {
+    top: 50%;
+    right: auto;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(640px, calc(100vw - 32px));
+    max-height: calc(100vh - 40px);
+    display: flex;
+    flex-direction: column;
+    padding: 14px 16px 18px;
+    overflow: hidden;
+}
+
+.sheetCreateHelp .sheetHdr {
+    flex: 0 0 auto;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--pd-border-subtle);
+}
+
+.sheetCreateHelp .sheetTitle {
+    font-size: 1.1rem;
+    letter-spacing: 0.01em;
+}
+
+.createHelpBody {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    padding-right: 4px;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: var(--pd-text);
+}
+
+.createHelpBody > p {
+    margin: 0 0 12px;
+    color: var(--pd-text-muted);
+}
+
+.createHelpBody > p:first-child {
+    color: var(--pd-text);
+    font-size: 0.95rem;
+}
+
+.createHelpSection {
+    margin: 0 0 18px;
+    padding: 14px 14px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--pd-border-subtle);
+    background: color-mix(in srgb, var(--pd-surface) 55%, transparent);
+}
+
+.createHelpSection:last-child {
+    margin-bottom: 4px;
+}
+
+.createHelpH {
+    margin: 0 0 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--pd-text);
+    line-height: 1.3;
+}
+
+.createHelpSubH {
+    margin: 12px 0 6px;
+    font-size: 0.82rem;
+    font-weight: 650;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: var(--pd-accent-hover);
+}
+
+.createHelpList {
+    margin: 0 0 12px;
+    padding-left: 1.25rem;
+    color: var(--pd-text-muted);
+}
+
+.createHelpList > li {
+    margin: 0 0 6px;
+    padding-left: 2px;
+}
+
+.createHelpList > li::marker {
+    color: var(--pd-accent);
+    font-weight: 600;
+}
+
+.createHelpListNested {
+    margin: 8px 0 4px;
+}
+
+.createHelpSection > p {
+    margin: 0 0 10px;
+    color: var(--pd-text-muted);
+}
+
+.createHelpStep {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: 10px 12px;
+    margin: 0 0 14px;
+    align-items: start;
+}
+
+.createHelpStep:last-child {
+    margin-bottom: 0;
+}
+
+.createHelpStepNum {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--pd-accent-soft);
+    border: 1px solid var(--pd-accent-border);
+    color: var(--pd-accent-hover);
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.createHelpStepBody > p {
+    margin: 0 0 8px;
+    color: var(--pd-text-muted);
+}
+
+.createHelpStepBody > p:first-child {
+    color: var(--pd-text);
+    font-weight: 600;
+}
+
+.createHelpCode {
+    display: inline;
+    padding: 1px 6px;
+    border-radius: 5px;
+    border: 1px solid var(--pd-border);
+    background: var(--pd-input);
+    color: var(--pd-text);
+    font-family: ui-monospace, Consolas, 'Cascadia Mono', monospace;
+    font-size: 0.84em;
+    word-break: break-all;
+}
+
+.createHelpLink {
+    appearance: none;
+    -webkit-appearance: none;
+    display: inline;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--pd-accent);
+    font: inherit;
+    font-size: inherit;
+    text-align: left;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+    word-break: break-all;
+}
+
+.createHelpLink:hover {
+    color: var(--pd-accent-hover);
+}
+
+.sheetRemoteConfirm {
+    top: 50%;
+    right: auto;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(420px, calc(100vw - 36px));
+    max-height: calc(100vh - 48px);
+    padding: 12px 14px 16px;
+}
+
+.sheetRemoteConfirm .accountPatField {
+    max-width: none;
+    width: 100%;
+    margin: 8px 0 0;
+}
+
+.accountRemoteConfirmTxt,
+.accountRemoteConfirmTarget {
+    margin: 8px 0 0;
+    font-size: 0.82rem;
+    line-height: 1.4;
+    color: var(--pd-text-muted);
+}
+
+.accountRemoteConfirmTarget {
+    word-break: break-all;
+    color: var(--pd-text);
+}
+
+.accountRemoteConfirmActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.sheetImportVaultName {
+    top: 50%;
+    right: auto;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(420px, calc(100vw - 36px));
+    max-height: calc(100vh - 48px);
+    padding: 12px 14px 16px;
+}
+
+.importVaultNameHint {
+    margin: 0 0 10px;
+    font-size: 0.82rem;
+    line-height: 1.4;
+    color: var(--pd-text-muted);
+}
+
+.sheetImportVaultName .lbl {
+    margin-bottom: 4px;
+}
+
+.sheetImportVaultName .inp {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.sheetImportVaultName .sheetBanner {
+    margin-top: 10px;
+}
+
+.importVaultNameActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.sheetAccount .accountBlockBtn {
+    align-self: flex-start;
+    margin-right: 0;
+}
+
+.sheetAccount .passWrap {
+    margin-bottom: 0;
+    max-width: min(160px, 28vw);
+}
+
+.sheetAccount .passWrap.accountPwField,
+.sheetAccount .passWrap.accountPatField {
+    max-width: var(--pd-input-max-width);
+    width: 100%;
+    flex: none;
+    min-width: 0;
+}
+
+.sheetAccount .passWrap .passInp {
+    height: 28px;
+    min-height: 28px;
+    padding: 4px 32px 4px 8px;
+    font-size: 0.8rem;
+    margin-bottom: 0;
+}
+
+.sheetAccount .passWrap.accountPwField .passInp,
+.sheetAccount .passWrap.accountPatField .passInp {
+    height: 34px;
+    min-height: 34px;
+    padding: 6px 36px 6px 10px;
+    font-size: 0.875rem;
+}
+
+.sheetAccount .passWrap .passToggle {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+    right: 4px;
+}
+
+.sheetAccount .passWrap.accountPwField .passToggle,
+.sheetAccount .passWrap.accountPatField .passToggle {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    min-height: 24px;
+    right: 6px;
+}
+
+.sheetAccount .passWrap .passToggle svg {
+    width: 12px;
+    height: 12px;
+}
+
+.sheetAccount .passWrap.accountPwField .passToggle svg,
+.sheetAccount .passWrap.accountPatField .passToggle svg {
+    width: 14px;
+    height: 14px;
+}
+
+.sheetAccount .accountExportBlock {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+}
+
+.sheetAccount .accountExportBlock > .lbl.inline {
+    margin-bottom: 2px;
+}
+
+.sheetAccount .accountExportBlock .authImportList {
+    margin: 0;
+    width: 100%;
+}
+
+.sheetAccount .accountExportBlock .authImportBtn {
+    min-width: 168px;
+}
+
+.sheetAccount .row.settings.accountSheetFooter {
+    margin-top: 8px;
+    padding-top: 8px;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
