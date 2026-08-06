@@ -10,6 +10,7 @@
 !.gitignore
 !LICENSE
 !README.md
+!README_EN.md
 !main.go
 !go.mod
 !go.sum
