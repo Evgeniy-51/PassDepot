@@ -216,6 +216,7 @@ In the profile **Account** screen:
 ### Recommendations
 
 - Use a **long, unique** master password; without it, the `.pd` cannot be recovered.
+- Store data whose disclosure could cause real harm in a **separate profile** (local vault only, with no Git repository sync).
 - Do not store the master password or PAT alongside a profile export.
 
 ---
