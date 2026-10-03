@@ -31,14 +31,16 @@ export const ru = {
     selectProfile: 'Выбор профиля',
     addProfileOption: '— Добавьте профиль —',
     addProfile: 'Добавить профиль',
-    patMissingHint: 'Введите GitHub (GitLab) PAT для доступа к удалённому хранилищу.',
+    patMissingHint: 'Профиль «{name}»: введите GitHub (GitLab) PAT для доступа к удалённому хранилищу.',
+    patReplaceHint: 'Профиль «{name}»: если сохранённый PAT устарел или неверен — введите новый.',
     patPlaceholder: 'GitHub (GitLab) PAT',
-    savePat: 'Сохранить PAT',
+    patDialogTitle: 'PAT для профиля «{name}»',
+    patSaveAndLogin: 'Сохранить и войти',
+    patChecking: 'Проверка…',
     password: 'Пароль',
     masterPassword: 'Master password',
     masterPasswordRepeat: 'Master password (повтор)',
     masterPasswordHint: ' - не менее 8 символов (буквы, цифры, спецсимволы)',
-    savePatFirstTitle: 'Сначала сохраните GitHub (GitLab) PAT',
     signIn: 'Войти',
     signingIn: 'Вход…',
     openingLocal: 'Открытие локального хранилища…',
@@ -125,8 +127,10 @@ export const ru = {
     exportVaultHint: 'ваши данные в зашифрованном .pd файле',
     exportProfile: 'Экспорт профиля',
     exportProfileHint: 'данные профиля в JSON (не содержит PAT и Master Password)',
+    deleteProfile: 'Удалить профиль',
     deleteProfileLocal: 'Удалить профиль локально',
-    deleteProfileTitle: 'Удалить данные на этом устройстве',
+    deleteProfileTitle:
+        'Удалить профиль «{name}» с этого устройства. Другие профили и репозиторий не изменятся.',
 
     // folders / records
     folderNamePlaceholder: 'Имя папки',
@@ -150,7 +154,6 @@ export const ru = {
 
     // notes / flash
     sessionLocked: 'Сессия заблокирована по таймауту',
-    patSavedCanLogin: 'PAT сохранён — можно войти',
     vaultPulled: 'База обновлена из удалённого репозитория.',
     repoSwitched: 'Репозиторий переключён',
     patSaved: 'PAT сохранён',
@@ -166,8 +169,6 @@ export const ru = {
     changeSavedGit: 'Изменение записано в хранилище. Нажмите «Сохранить», чтобы отправить в репозиторий.',
 
     // FE validation errors
-    errEnterPat: 'Введите GitHub (GitLab) PAT',
-    errSavePatFirst: 'Сначала сохраните GitHub (GitLab) PAT для этого профиля',
     errPasswordMismatch: 'Пароль и подтверждение не совпадают',
     errMasterMin8: 'Master password: минимум 8 символов',
     errProfileNameTaken: 'Профиль с таким именем уже есть',
@@ -180,15 +181,24 @@ export const ru = {
 
     // confirms
     confirmDeleteRecord: 'Удалить запись?',
-    confirmDeleteFolder: 'Удалить папку и все описания в ней?',
-    confirmDeleteLocalProfile: 'Удалить локальный профиль и его хранилище?',
-    confirmDeleteGitProfile: 'Удалить профиль локально? Репозиторий на GitHub (GitLab) не изменится.',
+    confirmDeleteFolder: 'Удалить папку и все данные в ней?',
+    deleteProfileDialogTitle: 'Удалить профиль «{name}»?',
+    deleteWarnLocal:
+        'Профиль и файл хранилища будут удалены с этого устройства. Экспортируйте данные, чтобы не потерять их.',
+    deleteWarnGit:
+        'Будут удалены локальная копия и сохранённый PAT. Репозиторий на GitHub (GitLab) не изменится — профиль можно вернуть импортом ранее экспортированного JSON профиля.',
+    deleteWarnGitUnsynced:
+        'В локальной копии есть изменения, которые НЕ отправлены в репозиторий. После удаления они будут потеряны.',
+    deleteExportFirst: 'Экспортировать .pd',
+    deleteTypeNameHint: 'Для подтверждения введите имя профиля:',
+    deleteProfileConfirm: 'Удалить профиль',
+    deleting: 'Удаление…',
     confirmCloseNewDiscard: 'Закрыть без сохранения? Введённый текст пропадёт.',
     confirmCloseEditDiscard: 'Закрыть окно? Несохранённые изменения пропадут.',
     confirmOpenNewLoseEdit: 'Открыть «Новая запись»? Черновики в окне редактирования пропадут.',
     confirmRestartNew: 'Начать заново? Введённый текст пропадёт.',
-    confirmOpenDescLoseNew: 'Открыть это описание? Несохранённый текст новой записи пропадёт.',
-    confirmSwitchDesc: 'Переключить описание? Черновики в текущем окне пропадут.',
+    confirmOpenDescLoseNew: 'Открыть эту запись? Несохранённый текст новой записи пропадёт.',
+    confirmSwitchDesc: 'Переключить запись? Черновики в текущем окне пропадут.',
     confirmLogoutDrafts:
         'Есть несохранённые черновики в полях (не нажата ✓). При выходе они пропадут.\n\nВыйти без сохранения?',
     confirmLogoutSaveLocal: 'Имеются несохранённые изменения. Сохранить перед выходом?',
@@ -273,14 +283,16 @@ export const en: Record<MsgKey, string> = {
     selectProfile: 'Select profile',
     addProfileOption: '— Add a profile —',
     addProfile: 'Add profile',
-    patMissingHint: 'Enter a GitHub (GitLab) PAT to access the remote vault.',
+    patMissingHint: 'Profile “{name}”: enter a GitHub (GitLab) PAT to access the remote vault.',
+    patReplaceHint: 'Profile “{name}”: if the saved PAT is expired or wrong, enter a new one.',
     patPlaceholder: 'GitHub (GitLab) PAT',
-    savePat: 'Save PAT',
+    patDialogTitle: 'PAT for profile “{name}”',
+    patSaveAndLogin: 'Save and sign in',
+    patChecking: 'Checking…',
     password: 'Password',
     masterPassword: 'Master password',
     masterPasswordRepeat: 'Master password (confirm)',
     masterPasswordHint: ' — at least 8 characters (letters, digits, symbols)',
-    savePatFirstTitle: 'Save a GitHub (GitLab) PAT first',
     signIn: 'Sign in',
     signingIn: 'Signing in…',
     openingLocal: 'Opening local vault…',
@@ -364,8 +376,10 @@ export const en: Record<MsgKey, string> = {
     exportVaultHint: 'your data in an encrypted .pd file',
     exportProfile: 'Export profile',
     exportProfileHint: 'profile metadata as JSON (does not include PAT or master password)',
+    deleteProfile: 'Delete profile',
     deleteProfileLocal: 'Delete profile locally',
-    deleteProfileTitle: 'Remove data on this device',
+    deleteProfileTitle:
+        'Delete profile “{name}” from this device. Other profiles and the repository will not be changed.',
 
     folderNamePlaceholder: 'Folder name',
     create: 'Create',
@@ -387,7 +401,6 @@ export const en: Record<MsgKey, string> = {
     hidePassword: 'Hide password',
 
     sessionLocked: 'Session locked due to inactivity',
-    patSavedCanLogin: 'PAT saved — you can sign in',
     vaultPulled: 'Vault updated from the remote repository.',
     repoSwitched: 'Repository switched',
     patSaved: 'PAT saved',
@@ -402,8 +415,6 @@ export const en: Record<MsgKey, string> = {
     changeSavedLocal: 'Change saved. Click Save.',
     changeSavedGit: 'Change saved to the vault. Click Save to push it to the repository.',
 
-    errEnterPat: 'Enter a GitHub (GitLab) PAT',
-    errSavePatFirst: 'Save a GitHub (GitLab) PAT for this profile first',
     errPasswordMismatch: 'Password and confirmation do not match',
     errMasterMin8: 'Master password: at least 8 characters',
     errProfileNameTaken: 'A profile with this name already exists',
@@ -416,9 +427,17 @@ export const en: Record<MsgKey, string> = {
 
     confirmDeleteRecord: 'Delete this entry?',
     confirmDeleteFolder: 'Delete this folder and all entries in it?',
-    confirmDeleteLocalProfile: 'Delete the local profile and its vault?',
-    confirmDeleteGitProfile:
-        'Delete this profile locally? The repository on GitHub (GitLab) will not be changed.',
+    deleteProfileDialogTitle: 'Delete profile “{name}”?',
+    deleteWarnLocal:
+        'The profile and vault file will be removed from this device. Export the data so you don’t lose it.',
+    deleteWarnGit:
+        'The local copy and the saved PAT will be removed. The repository on GitHub (GitLab) will not change — you can restore the profile by importing a previously exported profile JSON.',
+    deleteWarnGitUnsynced:
+        'The local copy has changes that were NOT pushed to the repository. They will be lost after deletion.',
+    deleteExportFirst: 'Export .pd first',
+    deleteTypeNameHint: 'To confirm, type the profile name:',
+    deleteProfileConfirm: 'Delete profile',
+    deleting: 'Deleting…',
     confirmCloseNewDiscard: 'Close without saving? Entered text will be lost.',
     confirmCloseEditDiscard: 'Close this window? Unsaved changes will be lost.',
     confirmOpenNewLoseEdit: 'Open New entry? Drafts in the edit window will be lost.',

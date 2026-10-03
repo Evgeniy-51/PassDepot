@@ -56,7 +56,11 @@ func DeletePAT(profileID string) error {
 
 // DeleteAllPATs удаляет все записи PassDepot/PAT/* из Credential Manager.
 func DeleteAllPATs() error {
-	list, err := wincred.FilteredList(targetPrefix + "*")
+	return deleteAllWithPrefix(targetPrefix)
+}
+
+func deleteAllWithPrefix(prefix string) error {
+	list, err := wincred.FilteredList(prefix + "*")
 	if err != nil {
 		return nil
 	}

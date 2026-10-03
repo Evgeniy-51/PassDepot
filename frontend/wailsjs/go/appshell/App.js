@@ -94,6 +94,10 @@ export function PickLocalVaultImport() {
   return window['go']['appshell']['App']['PickLocalVaultImport']();
 }
 
+export function ProfileHasUnsyncedChanges(arg1) {
+  return window['go']['appshell']['App']['ProfileHasUnsyncedChanges'](arg1);
+}
+
 export function Refresh() {
   return window['go']['appshell']['App']['Refresh']();
 }

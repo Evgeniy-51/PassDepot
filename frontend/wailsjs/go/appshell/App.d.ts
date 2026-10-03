@@ -49,6 +49,8 @@ export function Logout():Promise<void>;
 
 export function PickLocalVaultImport():Promise<appshell.LocalVaultImportPickDTO>;
 
+export function ProfileHasUnsyncedChanges(arg1:string):Promise<boolean>;
+
 export function Refresh():Promise<void>;
 
 export function RenameFolder(arg1:string,arg2:string):Promise<void>;

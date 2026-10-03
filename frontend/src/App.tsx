@@ -17,6 +17,7 @@ import {
     GetSession,
     GetVault,
     PickLocalVaultImport,
+    ProfileHasUnsyncedChanges,
     ConfirmLocalVaultImport,
     CancelLocalVaultImport,
     ImportProfileFromFile,
@@ -55,8 +56,40 @@ import { APP_VERSION } from './version';
 
 const NEW_DESC_VAL_EXPAND_ID = '__new__';
 
+/** Совпадает с needPATPrefix в internal/appshell/sync_errors.go. */
+const NEED_PAT_PREFIX = '[need-pat] ';
+
+function parseNeedPat(e: unknown): { needPat: boolean; msg: string } {
+    const s = String(e);
+    const i = s.indexOf(NEED_PAT_PREFIX);
+    if (i < 0) {
+        return { needPat: false, msg: s };
+    }
+    return { needPat: true, msg: s.slice(i + NEED_PAT_PREFIX.length) };
+}
+
+const LAST_PROFILE_KEY = 'passdepot.lastProfileId';
+
+function readLastProfileId(): string {
+    try {
+        return localStorage.getItem(LAST_PROFILE_KEY) ?? '';
+    } catch {
+        return '';
+    }
+}
+
+function storeLastProfileId(id: string) {
+    try {
+        localStorage.setItem(LAST_PROFILE_KEY, id);
+    } catch {
+        /* ignore */
+    }
+}
+
 type View = 'auth' | 'vault';
 type AuthMode = 'login' | 'add';
+type AccountSlot = 'profile' | 'lock' | 'password' | 'remote' | 'export';
+type AccountMsg = { slot: AccountSlot; kind: 'ok' | 'err'; text: string };
 
 export default function App() {
     const [view, setView] = useState<View>('auth');
@@ -67,7 +100,26 @@ export default function App() {
     const [profileId, setProfileId] = useState('');
     const [masterPw, setMasterPw] = useState('');
     /** PAT для выбранного профиля на экране входа (импорт без токена) */
-    const [loginPatInput, setLoginPatInput] = useState('');
+    const [patDialog, setPatDialog] = useState<{
+        id: string;
+        name: string;
+        hasPat: boolean;
+        reason: string;
+    } | null>(null);
+    const [patInput, setPatInput] = useState('');
+    const [patBusy, setPatBusy] = useState(false);
+    const [patErr, setPatErr] = useState('');
+    const patInputRef = useRef<HTMLInputElement>(null);
+    const [delTarget, setDelTarget] = useState<{
+        id: string;
+        name: string;
+        localOnly: boolean;
+        unsynced: boolean;
+    } | null>(null);
+    const [delName, setDelName] = useState('');
+    const [delBusy, setDelBusy] = useState(false);
+    const [delErr, setDelErr] = useState('');
+    const delNameRef = useRef<HTMLInputElement>(null);
     const [err, setErr] = useState('');
     const [note, setNote] = useState('');
 
@@ -134,7 +186,7 @@ export default function App() {
     const [createPw2, setCreatePw2] = useState('');
 
     const [accountOpen, setAccountOpen] = useState(false);
-    const [accountErr, setAccountErr] = useState('');
+    const [accountMsg, setAccountMsg] = useState<AccountMsg | null>(null);
     const [pullInProgress, setPullInProgress] = useState(false);
     /** Вход / создание профиля — долгий Login (git + расшифровка) */
     const [authBusy, setAuthBusy] = useState(false);
@@ -145,7 +197,6 @@ export default function App() {
     );
 
     const selectedProfile = useMemo(() => profiles.find((p) => p.id === profileId) ?? null, [profiles, profileId]);
-    const selectedHasPat = !!selectedProfile?.hasPat;
     const selectedLocalOnly = !!selectedProfile?.localOnly;
 
     const isProfileNameTaken = useCallback(
@@ -282,13 +333,25 @@ export default function App() {
             if (prev && profiles.some((p) => p.id === prev)) {
                 return prev;
             }
+            const last = readLastProfileId();
+            if (last && profiles.some((p) => p.id === last)) {
+                return last;
+            }
             return profiles[0].id;
         });
     }, [profiles]);
 
     useEffect(() => {
-        setLoginPatInput('');
-    }, [profileId]);
+        if (delTarget) {
+            delNameRef.current?.focus();
+        }
+    }, [delTarget]);
+
+    useEffect(() => {
+        if (patDialog) {
+            patInputRef.current?.focus();
+        }
+    }, [patDialog]);
 
     // Размер/показ окна делается в backend Startup() (StartHidden), чтобы убрать фликер.
 
@@ -318,46 +381,61 @@ export default function App() {
         }
     }, [view, refreshVault]);
 
-    async function doSaveLoginPat() {
-        if (!profileId?.trim()) {
-            return;
-        }
-        const pat = loginPatInput.trim();
-        if (!pat) {
-            setErr(tr('errEnterPat'));
-            return;
-        }
-        setErr('');
-        try {
-            await UpdateProfilePAT(profileId, pat);
-            setLoginPatInput('');
-            await loadProfiles();
-            flashNote(tr('patSavedCanLogin'));
-        } catch (e: any) {
-            setErr(String(e));
-        }
-    }
-
     async function doLogin() {
         if (!profileId?.trim() || !masterPw) {
-            return;
-        }
-        if (!selectedLocalOnly && !selectedHasPat) {
-            setErr(tr('errSavePatFirst'));
             return;
         }
         setErr('');
         setAuthBusy(true);
         try {
             await Login(profileId, masterPw);
+            storeLastProfileId(profileId);
             setMasterPw('');
             setNote('');
             setView('vault');
         } catch (e: any) {
-            setErr(String(e));
+            const { needPat, msg } = parseNeedPat(e);
+            if (needPat && selectedProfile) {
+                setPatInput('');
+                setPatErr('');
+                setPatDialog({
+                    id: selectedProfile.id,
+                    name: selectedProfile.displayName,
+                    hasPat: !!selectedProfile.hasPat,
+                    reason: msg,
+                });
+            } else {
+                setErr(msg);
+            }
         } finally {
             setAuthBusy(false);
         }
+    }
+
+    function closePatDialog() {
+        if (patBusy) return;
+        setPatDialog(null);
+        setPatInput('');
+        setPatErr('');
+    }
+
+    async function submitPatDialog() {
+        const pat = patInput.trim();
+        if (!patDialog || !pat || patBusy) return;
+        setPatBusy(true);
+        setPatErr('');
+        try {
+            await UpdateProfilePAT(patDialog.id, pat);
+        } catch (e: any) {
+            setPatErr(String(e));
+            setPatBusy(false);
+            return;
+        }
+        setPatBusy(false);
+        setPatDialog(null);
+        setPatInput('');
+        await loadProfiles();
+        await doLogin();
     }
 
     function onAuthPasswordKeyDown(e: ReactKeyboardEvent<HTMLInputElement>) {
@@ -368,7 +446,7 @@ export default function App() {
         if (authBusy) {
             return;
         }
-        if (profileId && masterPw.trim() && (selectedLocalOnly || selectedHasPat)) {
+        if (profileId && masterPw.trim()) {
             void doLogin();
         }
     }
@@ -427,6 +505,7 @@ export default function App() {
             setProfileId(p.id);
             await loadProfiles();
             await Login(p.id, pw);
+            storeLastProfileId(p.id);
             setNote('');
             setView('vault');
         } catch (e: any) {
@@ -438,7 +517,7 @@ export default function App() {
 
     function clearSessionAndAuthView() {
         setErr('');
-        setAccountErr('');
+        setAccountMsg(null);
         Logout();
         setView('auth');
         setAuthMode('login');
@@ -699,7 +778,7 @@ export default function App() {
     function requestSaveRemote() {
         if (!session || session.localOnly) return;
         if (!remoteRepoURL.trim() || !patUpdate.trim()) return;
-        setAccountErr('');
+        setAccountMsg(null);
         if (isRemoteTargetChanged()) {
             setRemoteMasterPw('');
             setRemoteConfirmOpen(true);
@@ -711,7 +790,7 @@ export default function App() {
     async function doSaveRemote(masterPassword: string) {
         if (!session || session.localOnly) return;
         if (!remoteRepoURL.trim() || !patUpdate.trim()) return;
-        setAccountErr('');
+        setAccountMsg(null);
         setRemoteBusy(true);
         try {
             const r = await SaveProfileRemote(
@@ -720,19 +799,18 @@ export default function App() {
                 patUpdate.trim(),
                 masterPassword,
             );
-            setPatUpdate('');
             setRemoteMasterPw('');
             setRemoteConfirmOpen(false);
             await refreshVault();
             if (r?.migrated) {
                 setMigrateWarnOldUrl(r.oldRepoUrl || '');
-                flashNote(tr('repoSwitched'));
+                setAccountMsg({ slot: 'remote', kind: 'ok', text: tr('repoSwitched') });
             } else {
                 setMigrateWarnOldUrl('');
-                flashNote(tr('patSaved'));
+                setAccountMsg({ slot: 'remote', kind: 'ok', text: tr('patSaved') });
             }
         } catch (e: any) {
-            setAccountErr(String(e));
+            setAccountMsg({ slot: 'remote', kind: 'err', text: String(e) });
         } finally {
             setRemoteBusy(false);
         }
@@ -740,24 +818,24 @@ export default function App() {
 
     async function doExportFile() {
         if (!profileId) return;
-        setAccountErr('');
+        setAccountMsg(null);
         try {
             await ExportProfileToFile(profileId);
-            flashNote(tr('fileSaved'));
+            setAccountMsg({ slot: 'export', kind: 'ok', text: tr('fileSaved') });
         } catch (e: any) {
-            setAccountErr(String(e));
+            setAccountMsg({ slot: 'export', kind: 'err', text: String(e) });
         }
     }
 
     async function doExportLocalVault() {
         if (!profileId) return;
-        setAccountErr('');
+        setAccountMsg(null);
         try {
             await ExportLocalVaultToFile(profileId);
             await refreshVault();
-            flashNote(tr('vaultExported'));
+            setAccountMsg({ slot: 'export', kind: 'ok', text: tr('vaultExported') });
         } catch (e: any) {
-            setAccountErr(String(e));
+            setAccountMsg({ slot: 'export', kind: 'err', text: String(e) });
         }
     }
 
@@ -835,7 +913,7 @@ export default function App() {
         if (!importJson.trim()) return;
         setErr('');
         try {
-            await ImportProfileJSON(importJson.trim());
+            const r = await ImportProfileJSON(importJson.trim());
             setImportJson('');
             setNewName('');
             setCreatePw('');
@@ -843,6 +921,7 @@ export default function App() {
             setAddTab('create');
             flashNote(tr('profileImported'));
             await loadProfiles();
+            setProfileId(r.id);
             setAuthMode('login');
         } catch (e: any) {
             setErr(String(e));
@@ -860,7 +939,7 @@ export default function App() {
     }
 
     async function applyAutoLock() {
-        setAccountErr('');
+        setAccountMsg(null);
         try {
             let n = Math.floor(Number(autoLockMin));
             if (Number.isNaN(n) || n < 0) n = 0;
@@ -868,31 +947,31 @@ export default function App() {
             await SetAutoLockMinutes(n);
             setAutoLockMin(n);
             await refreshVault();
-            flashNote(tr('autoLockSaved'));
+            setAccountMsg({ slot: 'lock', kind: 'ok', text: tr('autoLockSaved') });
         } catch (e: any) {
-            setAccountErr(String(e));
+            setAccountMsg({ slot: 'lock', kind: 'err', text: String(e) });
         }
     }
 
     async function doChangeMasterPw() {
         if (pwNew !== pwNew2) {
-            setAccountErr(tr('errNewPasswordMismatch'));
+            setAccountMsg({ slot: 'password', kind: 'err', text: tr('errNewPasswordMismatch') });
             return;
         }
         if (pwNew.trim().length < 8) {
-            setAccountErr(tr('errNewPasswordMin8'));
+            setAccountMsg({ slot: 'password', kind: 'err', text: tr('errNewPasswordMin8') });
             return;
         }
-        setAccountErr('');
+        setAccountMsg(null);
         try {
             await ChangeMasterPassword(pwOld, pwNew);
             setPwOld('');
             setPwNew('');
             setPwNew2('');
             await refreshVault();
-            flashNote(tr('masterPasswordChanged'));
+            setAccountMsg({ slot: 'password', kind: 'ok', text: tr('masterPasswordChanged') });
         } catch (e: any) {
-            setAccountErr(String(e));
+            setAccountMsg({ slot: 'password', kind: 'err', text: String(e) });
         }
     }
 
@@ -900,54 +979,85 @@ export default function App() {
         const name = session?.displayName || selectedProfile?.displayName || '';
         setProfileRenameName(name);
         setProfileRenameOpen(true);
-        setAccountErr('');
+        setAccountMsg(null);
     }
 
     function cancelProfileRename() {
         setProfileRenameOpen(false);
         setProfileRenameName('');
-        setAccountErr('');
+        setAccountMsg(null);
     }
 
     async function doRenameProfile() {
         const id = session?.profileId || profileId;
         const name = profileRenameName.trim();
         if (!id || !name) {
-            setAccountErr(tr('errEnterProfileName'));
+            setAccountMsg({ slot: 'profile', kind: 'err', text: tr('errEnterProfileName') });
             return;
         }
         if (isProfileNameTaken(name, id)) {
-            setAccountErr(tr('errProfileNameTaken'));
+            setAccountMsg({ slot: 'profile', kind: 'err', text: tr('errProfileNameTaken') });
             return;
         }
-        setAccountErr('');
+        setAccountMsg(null);
         try {
             await RenameProfile(id, name);
             setProfileRenameOpen(false);
             setProfileRenameName('');
             await loadProfiles();
             await refreshVault();
-            flashNote(tr('profileRenamed'));
+            setAccountMsg({ slot: 'profile', kind: 'ok', text: tr('profileRenamed') });
         } catch (e: any) {
-            setAccountErr(String(e));
+            setAccountMsg({ slot: 'profile', kind: 'err', text: String(e) });
         }
     }
 
-    async function doDeleteProfile() {
-        const id = session?.profileId;
+    async function openDeleteDialog(id: string, name: string, localOnly: boolean) {
         if (!id) return;
-        const message = session?.localOnly
-            ? tr('confirmDeleteLocalProfile')
-            : tr('confirmDeleteGitProfile');
-        if (!confirm(message)) return;
-        setAccountErr('');
+        const unsynced = localOnly ? false : await ProfileHasUnsyncedChanges(id).catch(() => true);
+        setDelName('');
+        setDelErr('');
+        setDelTarget({ id, name, localOnly, unsynced });
+    }
+
+    function closeDeleteDialog() {
+        if (delBusy) return;
+        setDelTarget(null);
+        setDelName('');
+        setDelErr('');
+    }
+
+    const delNameMatches = !!delTarget && delName.trim() === delTarget.name;
+
+    async function exportBeforeDelete() {
+        if (!delTarget || delBusy) return;
+        setDelErr('');
+        try {
+            await ExportLocalVaultToFile(delTarget.id);
+            flashNote(tr('vaultExported'));
+        } catch (e: any) {
+            setDelErr(String(e));
+        }
+    }
+
+    async function confirmDeleteDialog() {
+        if (!delTarget || !delNameMatches || delBusy) return;
+        const id = delTarget.id;
+        setDelBusy(true);
+        setDelErr('');
         try {
             await DeleteProfile(id);
-            clearSessionAndAuthView();
+            if (session?.profileId === id) {
+                clearSessionAndAuthView();
+            }
+            setDelTarget(null);
+            setDelName('');
             setProfileId('');
             await loadProfiles();
         } catch (e: any) {
-            setAccountErr(String(e));
+            setDelErr(String(e));
+        } finally {
+            setDelBusy(false);
         }
     }
 
@@ -1292,6 +1402,32 @@ export default function App() {
     const vaultModalCoversBanners = view === 'vault' && (accountOpen || !!descModalMode);
     const showGlobalBanners = !vaultModalCoversBanners;
 
+    function renderAccountBanner(slot: AccountSlot) {
+        const msg = accountMsg?.slot === slot ? accountMsg : null;
+        const showSync = slot === 'remote' && !msg && !session?.localOnly && !!session?.lastError;
+        if (!msg && !showSync) {
+            return null;
+        }
+        return (
+            <div className="accountBlockBanner">
+                {showSync && (
+                    <div className="err soft sheetBanner" role="status">
+                        {tr('syncErrorPrefix')}
+                        {session!.lastError}
+                    </div>
+                )}
+                {msg && (
+                    <div
+                        className={`${msg.kind === 'ok' ? 'ok' : 'err'} sheetBanner`}
+                        role={msg.kind === 'err' ? 'alert' : 'status'}
+                    >
+                        {msg.text}
+                    </div>
+                )}
+            </div>
+        );
+    }
+
     return (
         <div id="App" className={view === 'auth' ? 'wrap auth' : 'wrap vaultApp'}>
             {view !== 'auth' && (
@@ -1364,38 +1500,22 @@ export default function App() {
                                         <button
                                             className="abtn abtnRow pdBtn pdBtn--secondary"
                                             type="button"
-                                            onClick={openAddMode}
-                                            disabled={authBusy}
+                                            title={tr('deleteProfileTitle', {
+                                                name: selectedProfile?.displayName ?? '',
+                                            })}
+                                            onClick={() =>
+                                                selectedProfile &&
+                                                void openDeleteDialog(
+                                                    selectedProfile.id,
+                                                    selectedProfile.displayName,
+                                                    !!selectedProfile.localOnly,
+                                                )
+                                            }
+                                            disabled={authBusy || !selectedProfile}
                                         >
-                                            {tr('addProfile')}
+                                            {tr('deleteProfile')}
                                         </button>
                                     </div>
-
-                                    {profileId && !selectedLocalOnly && !selectedHasPat && (
-                                        <div className="authPatMissing">
-                                            <p className="authPatMissingTxt">{tr('patMissingHint')}</p>
-                                            <div className="authPatRow">
-                                                <input
-                                                    className="ainp authPatInp"
-                                                    type="text"
-                                                    placeholder={tr('patPlaceholder')}
-                                                    value={loginPatInput}
-                                                    onChange={(e) => setLoginPatInput(e.target.value)}
-                                                    autoComplete="off"
-                                                    spellCheck={false}
-                                                    disabled={authBusy}
-                                                />
-                                                <button
-                                                    className="abtn abtnPat pdBtn pdBtn--primary"
-                                                    type="button"
-                                                    onClick={() => void doSaveLoginPat()}
-                                                    disabled={authBusy || !loginPatInput.trim()}
-                                                >
-                                                    {tr('savePat')}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
 
                                     <div className="authRow authRowLogin">
                                         <div className="authRowMain">
@@ -1418,19 +1538,23 @@ export default function App() {
                                             className="abtn abtnRow abtnLogin pdBtn pdBtn--primary"
                                             type="button"
                                             onClick={() => void doLogin()}
-                                            disabled={
-                                                !profileId ||
-                                                !masterPw.trim() ||
-                                                authBusy ||
-                                                (!selectedLocalOnly && !selectedHasPat)
-                                            }
-                                            title={
-                                                !selectedLocalOnly && !selectedHasPat
-                                                    ? tr('savePatFirstTitle')
-                                                    : undefined
-                                            }
+                                            disabled={!profileId || !masterPw.trim() || authBusy}
                                         >
                                             {authBusy ? tr('signingIn') : tr('signIn')}
+                                        </button>
+                                    </div>
+
+                                    <div className="authAddRow">
+                                        <button
+                                            className={
+                                                'abtn pdBtn ' +
+                                                (profiles.length === 0 ? 'pdBtn--primary' : 'pdBtn--secondary')
+                                            }
+                                            type="button"
+                                            onClick={openAddMode}
+                                            disabled={authBusy}
+                                        >
+                                            {tr('addProfile')}
                                         </button>
                                     </div>
                                 </div>
@@ -1781,7 +1905,7 @@ export default function App() {
                                     className="pbtn"
                                     type="button"
                                     onClick={() => {
-                                        setAccountErr('');
+                                        setAccountMsg(null);
                                         setPwOld('');
                                         setPwNew('');
                                         setPwNew2('');
@@ -1888,7 +2012,7 @@ export default function App() {
                                 <div
                                     className="backdrop"
                                     onClick={() => {
-                                        setAccountErr('');
+                                        setAccountMsg(null);
                                         setAccountOpen(false);
                                     }}
                                 />
@@ -1899,7 +2023,7 @@ export default function App() {
                                             className="xbtn"
                                             type="button"
                                             onClick={() => {
-                                                setAccountErr('');
+                                                setAccountMsg(null);
                                                 setAccountOpen(false);
                                             }}
                                             aria-label={tr('close')}
@@ -1907,31 +2031,6 @@ export default function App() {
                                             ×
                                         </button>
                                     </div>
-                                    {(err || accountErr || (!session?.localOnly && session?.lastError) || note) && (
-                                        <div className="sheetNotifications">
-                                            {err && (
-                                                <div className="err sheetBanner" role="alert">
-                                                    {err}
-                                                </div>
-                                            )}
-                                            {accountErr && (
-                                                <div className="err sheetBanner" role="alert">
-                                                    {accountErr}
-                                                </div>
-                                            )}
-                                            {!session?.localOnly && session?.lastError && (
-                                                <div className="err soft sheetBanner" role="status">
-                                                    {tr('syncErrorPrefix')}
-                                                    {session.lastError}
-                                                </div>
-                                            )}
-                                            {note && (
-                                                <div className="ok sheetBanner" role="status">
-                                                    {note}
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
 
                                     <div className="row settings accountProfileRow">
                                         {profileRenameOpen ? (
@@ -1985,6 +2084,7 @@ export default function App() {
                                                     ''}
                                             </button>
                                         )}
+                                        {renderAccountBanner('profile')}
                                     </div>
 
                                     <div className="row settings accountAutoLockRow">
@@ -2002,6 +2102,7 @@ export default function App() {
                                         <button className="btn accountAutoLockBtn" type="button" onClick={applyAutoLock}>
                                             {tr('apply')}
                                         </button>
+                                        {renderAccountBanner('lock')}
                                     </div>
 
                                     <div className="row settings accountPwBlock">
@@ -2049,6 +2150,7 @@ export default function App() {
                                                 </label>
                                             </div>
                                         </div>
+                                        {renderAccountBanner('password')}
                                     </div>
 
                                     {session && !session.localOnly && (
@@ -2105,6 +2207,7 @@ export default function App() {
                                             >
                                                 {remoteBusy ? tr('saving') : tr('save')}
                                             </button>
+                                            {renderAccountBanner('remote')}
                                             {migrateWarnOldUrl && (
                                                 <div className="accountMigrateWarn" role="status">
                                                     <p>{tr('migrateWarn')}</p>
@@ -2169,9 +2272,9 @@ export default function App() {
                                                         }
                                                     }}
                                                 />
-                                                {accountErr && remoteConfirmOpen && (
+                                                {accountMsg?.slot === 'remote' && accountMsg.kind === 'err' && (
                                                     <div className="err sheetBanner" role="alert">
-                                                        {accountErr}
+                                                        {accountMsg.text}
                                                     </div>
                                                 )}
                                                 <div className="accountRemoteConfirmActions">
@@ -2190,7 +2293,7 @@ export default function App() {
                                                         onClick={() => {
                                                             setRemoteConfirmOpen(false);
                                                             setRemoteMasterPw('');
-                                                            setAccountErr('');
+                                                            setAccountMsg(null);
                                                         }}
                                                     >
                                                         {tr('cancel')}
@@ -2226,6 +2329,7 @@ export default function App() {
                                                 </div>
                                             )}
                                         </div>
+                                        {renderAccountBanner('export')}
                                     </div>
 
                                     <div className="row settings accountSheetFooter">
@@ -2233,7 +2337,7 @@ export default function App() {
                                             className="btn"
                                             type="button"
                                             onClick={() => {
-                                                setAccountErr('');
+                                                setAccountMsg(null);
                                                 setAccountOpen(false);
                                             }}
                                         >
@@ -2242,8 +2346,17 @@ export default function App() {
                                         <button
                                             className="btn danger"
                                             type="button"
-                                            title={tr('deleteProfileTitle')}
-                                            onClick={() => void doDeleteProfile()}
+                                            title={tr('deleteProfileTitle', {
+                                                name: session?.displayName ?? '',
+                                            })}
+                                            onClick={() =>
+                                                session &&
+                                                void openDeleteDialog(
+                                                    session.profileId,
+                                                    session.displayName,
+                                                    !!session.localOnly,
+                                                )
+                                            }
                                         >
                                             {tr('deleteProfileLocal')}
                                         </button>
@@ -2628,6 +2741,147 @@ export default function App() {
                         </div>
                     </div>
                 </main>
+            )}
+
+            {patDialog && (
+                <div className="modal patDialogModal" role="dialog" aria-modal="true" aria-labelledby="patDialogTitle">
+                    <div className="backdrop" onClick={closePatDialog} />
+                    <div className="sheet sheetPatDialog">
+                        <div className="sheetHdr">
+                            <div className="sheetTitle" id="patDialogTitle">
+                                {tr('patDialogTitle', { name: patDialog.name })}
+                            </div>
+                        </div>
+                        <p className="patDialogHint">
+                            {tr(patDialog.hasPat ? 'patReplaceHint' : 'patMissingHint', { name: patDialog.name })}
+                        </p>
+                        {patDialog.reason && <p className="patDialogReason">{patDialog.reason}</p>}
+                        <label className="lbl" htmlFor="patDialogInp">
+                            {tr('patPlaceholder')}
+                        </label>
+                        <input
+                            id="patDialogInp"
+                            ref={patInputRef}
+                            className="inp"
+                            type="text"
+                            value={patInput}
+                            onChange={(e) => setPatInput(e.target.value)}
+                            disabled={patBusy}
+                            autoComplete="off"
+                            spellCheck={false}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    void submitPatDialog();
+                                } else if (e.key === 'Escape') {
+                                    e.preventDefault();
+                                    closePatDialog();
+                                }
+                            }}
+                        />
+                        {patErr && (
+                            <div className="err sheetBanner" role="alert">
+                                {patErr}
+                            </div>
+                        )}
+                        <div className="patDialogActions">
+                            <button
+                                className="btn pdBtn pdBtn--primary"
+                                type="button"
+                                disabled={patBusy || !patInput.trim()}
+                                onClick={() => void submitPatDialog()}
+                            >
+                                {patBusy ? tr('patChecking') : tr('patSaveAndLogin')}
+                            </button>
+                            <button
+                                className="btn pdBtn pdBtn--secondary"
+                                type="button"
+                                disabled={patBusy}
+                                onClick={closePatDialog}
+                            >
+                                {tr('cancel')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {delTarget && (
+                <div className="modal deleteProfileModal" role="dialog" aria-modal="true" aria-labelledby="deleteProfileTitle">
+                    <div className="backdrop" onClick={closeDeleteDialog} />
+                    <div className="sheet sheetDeleteProfile">
+                        <div className="sheetHdr">
+                            <div className="sheetTitle" id="deleteProfileTitle">
+                                {tr('deleteProfileDialogTitle', { name: delTarget.name })}
+                            </div>
+                        </div>
+                        <p className="deleteProfileWarn">
+                            {tr(
+                                delTarget.localOnly
+                                    ? 'deleteWarnLocal'
+                                    : delTarget.unsynced
+                                      ? 'deleteWarnGitUnsynced'
+                                      : 'deleteWarnGit',
+                            )}
+                        </p>
+                        {(delTarget.localOnly || delTarget.unsynced) && (
+                            <button
+                                className="btn pdBtn pdBtn--secondary deleteProfileExport"
+                                type="button"
+                                disabled={delBusy}
+                                onClick={() => void exportBeforeDelete()}
+                            >
+                                {tr('deleteExportFirst')}
+                            </button>
+                        )}
+                        <label className="lbl" htmlFor="deleteProfileNameInp">
+                            {tr('deleteTypeNameHint')} <strong className="deleteProfileName">{delTarget.name}</strong>
+                        </label>
+                        <input
+                            id="deleteProfileNameInp"
+                            ref={delNameRef}
+                            className="inp"
+                            type="text"
+                            value={delName}
+                            onChange={(e) => setDelName(e.target.value)}
+                            disabled={delBusy}
+                            autoComplete="off"
+                            spellCheck={false}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    void confirmDeleteDialog();
+                                } else if (e.key === 'Escape') {
+                                    e.preventDefault();
+                                    closeDeleteDialog();
+                                }
+                            }}
+                        />
+                        {delErr && (
+                            <div className="err sheetBanner" role="alert">
+                                {delErr}
+                            </div>
+                        )}
+                        <div className="deleteProfileActions">
+                            <button
+                                className="btn pdBtn pdBtn--danger"
+                                type="button"
+                                disabled={delBusy || !delNameMatches}
+                                onClick={() => void confirmDeleteDialog()}
+                            >
+                                {delBusy ? tr('deleting') : tr('deleteProfileConfirm')}
+                            </button>
+                            <button
+                                className="btn pdBtn pdBtn--secondary"
+                                type="button"
+                                disabled={delBusy}
+                                onClick={closeDeleteDialog}
+                            >
+                                {tr('cancel')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

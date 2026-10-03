@@ -16,6 +16,10 @@
 !go.sum
 !wails.json
 
+# --- Документация ---
+!docs/
+!docs/**
+
 # --- Backend (Go) ---
 !internal/
 !internal/**

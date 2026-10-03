@@ -237,26 +237,74 @@ func (a *App) Login(profileID string, masterPassword string) error {
 	if p.LocalOnly {
 		return a.loginLocal(profileID, masterPassword)
 	}
-	pat, err := credstore.GetPAT(profileID)
-	if err != nil || strings.TrimSpace(pat) == "" {
-		return errors.New(L("PAT не найден; укажите токен в настройках", "PAT not found; enter the token in profile settings"))
-	}
+	// PAT нужен только для связи с репозиторием; без него открываем локальную копию, если она есть.
+	pat, _ := credstore.GetPAT(profileID)
+	pat = strings.TrimSpace(pat)
 
 	repoDir, err := profile.LocalRepoDir(profileID)
 	if err != nil {
 		return err
 	}
+	vp, err := vaultRepoPath(profileID)
+	if err != nil {
+		return err
+	}
+	rel := profile.VaultPathInRepo(p)
+
+	// localOnlyOpen: remote не обновил клон, открываем базу с диска как есть.
+	localOnlyOpen := false
+	openPending := false
+	openDirty := false
+	openWarn := ""
 
 	gitDir := filepath.Join(repoDir, ".git")
-	if _, err := os.Stat(gitDir); os.IsNotExist(err) {
-		if err := gitremote.Clone(pat, p.RepoURL, repoDir); err != nil {
-			return fmt.Errorf("%s: %w", L("clone", "Clone"), err)
+	_, gitErr := os.Stat(gitDir)
+	if gitErr != nil && !os.IsNotExist(gitErr) {
+		return gitErr
+	}
+	hasClone := gitErr == nil
+	_, vaultErr := os.Stat(vp)
+	hasVault := vaultErr == nil
+
+	if pat == "" {
+		if !hasClone || !hasVault {
+			return needPATError(Lf("Профиль «%s»: нужен PAT, чтобы загрузить базу из репозитория.",
+				"Profile “%s”: a PAT is required to download the vault from the repository.", p.DisplayName))
 		}
-	} else if err != nil {
-		return err
-	} else {
-		if err := gitremote.Refresh(pat, repoDir, p.Branch); err != nil {
-			return fmt.Errorf("%s: %w", L("refresh", "Refresh"), err)
+		localOnlyOpen = true
+		openWarn = L("PAT не задан — открыта локальная копия, синхронизация с репозиторием отключена. Укажите PAT в настройках профиля.",
+			"No PAT — opened the local copy, repository sync is disabled. Set the PAT in profile settings.")
+		if lc, lcErr := gitremote.LocalChanges(repoDir, p.Branch, rel); lcErr == nil && lc != nil {
+			openPending = true
+			openDirty = lc.Uncommitted
+		}
+	} else if !hasClone {
+		if err := gitremote.Clone(pat, p.RepoURL, repoDir); err != nil {
+			msg := formatPullError(fmt.Errorf("%s: %w", L("clone", "Clone"), err))
+			if isAuthError(err) {
+				return needPATError(msg)
+			}
+			return errors.New(msg)
+		}
+	} else if err := gitremote.Refresh(pat, repoDir, p.Branch, rel); err != nil {
+		// Без файла базы на диске открывать нечего; пустую базу тут создавать нельзя —
+		// следующий push затёр бы настоящую в репозитории.
+		if !hasVault {
+			msg := formatPullError(fmt.Errorf("%s: %w", L("refresh", "Refresh"), err))
+			if isAuthError(err) {
+				return needPATError(msg)
+			}
+			return errors.New(msg)
+		}
+		localOnlyOpen = true
+		var lc *gitremote.LocalChangesError
+		if errors.As(err, &lc) {
+			openPending = true
+			openDirty = lc.Uncommitted
+			openWarn = localChangesMessage(lc)
+		} else {
+			openWarn = L("Нет доступа к репозиторию — открыта локальная копия. ", "Repository unavailable — opened the local copy. ") +
+				formatPullError(err)
 		}
 	}
 
@@ -270,16 +318,12 @@ func (a *App) Login(profileID string, masterPassword string) error {
 
 	a.masterPw = masterCopy
 
-	vp, err := vaultRepoPath(profileID)
-	if err != nil {
-		a.logoutLocked()
-		a.mu.Unlock()
-		return err
-	}
-
-	rel := profile.VaultPathInRepo(p)
-
 	if _, err := os.Stat(vp); os.IsNotExist(err) {
+		if localOnlyOpen {
+			a.logoutLocked()
+			a.mu.Unlock()
+			return errors.New(L("Файл базы не найден в локальной копии.", "Vault file not found in the local copy."))
+		}
 		v := emptyVault()
 		blob, err := vaultcore.EncryptVault(v, a.masterPw)
 		if err != nil {
@@ -345,14 +389,27 @@ func (a *App) Login(profileID string, masterPassword string) error {
 	}
 	a.vault = v
 	a.profileID = profileID
-	a.dirty = false
+	a.dirty = openDirty
 	a.entryDirty = false
-	a.pendingSync = false
-	a.lastErr = ""
-	a.lastPullAt = time.Now()
+	a.pendingSync = openPending
+	a.lastErr = openWarn
+	if !localOnlyOpen {
+		a.lastPullAt = time.Now()
+	}
 	a.startAutoLockLocked()
 	a.mu.Unlock()
 	return nil
+}
+
+func localChangesMessage(lc *gitremote.LocalChangesError) string {
+	if lc.Behind > 0 {
+		return L("Изменения есть и здесь, и в репозитории (с другого устройства). Открыта локальная копия; "+
+			"отправка будет отклонена, пока расхождение не устранено.",
+			"Changes exist both here and in the repository (from another device). Opened the local copy; "+
+				"push will be rejected until the divergence is resolved.")
+	}
+	return L("Есть изменения, не отправленные в репозиторий. Открыта локальная копия — сохраните, чтобы отправить.",
+		"There are changes not pushed to the repository. Opened the local copy — save to push them.")
 }
 
 func (a *App) loginLocal(profileID, masterPassword string) error {
@@ -453,11 +510,8 @@ func (a *App) Save() error {
 		a.touchActivityLocked()
 		return nil
 	}
-	pat, err := credstore.GetPAT(a.profileID)
-	if err != nil || pat == "" {
-		a.touchActivityLocked()
-		return errors.New(L("PAT не найден", "PAT not found"))
-	}
+	pat, _ := credstore.GetPAT(a.profileID)
+	pat = strings.TrimSpace(pat)
 	repoDir, err := profile.LocalRepoDir(a.profileID)
 	if err != nil {
 		a.touchActivityLocked()
@@ -495,6 +549,12 @@ func (a *App) Save() error {
 		a.entryDirty = false
 	}
 
+	if pat == "" {
+		a.pendingSync = true
+		a.lastErr = msgSavedNoPAT()
+		a.touchActivityLocked()
+		return nil
+	}
 	if err := gitremote.Push(pat, repoDir, p.Branch); err != nil {
 		a.pendingSync = true
 		a.lastErr = err.Error()
@@ -505,6 +565,11 @@ func (a *App) Save() error {
 	a.lastErr = ""
 	a.touchActivityLocked()
 	return nil
+}
+
+func msgSavedNoPAT() string {
+	return L("Сохранено локально. PAT не задан — отправка в репозиторий отложена; укажите PAT в настройках профиля.",
+		"Saved locally. No PAT — push to the repository is postponed; set the PAT in profile settings.")
 }
 
 // Refresh подтягивает remote и перечитывает vault (только если нет несохранённых изменений).
@@ -545,8 +610,17 @@ func (a *App) Refresh() error {
 		a.touchActivityLocked()
 		return errors.New(a.lastErr)
 	}
-	if err := gitremote.Refresh(pat, repoDir, p.Branch); err != nil {
-		a.lastErr = formatPullError(err)
+	if err := gitremote.Refresh(pat, repoDir, p.Branch, profile.VaultPathInRepo(p)); err != nil {
+		var lc *gitremote.LocalChangesError
+		if errors.As(err, &lc) {
+			a.pendingSync = true
+			if lc.Uncommitted {
+				a.dirty = true
+			}
+			a.lastErr = localChangesMessage(lc)
+		} else {
+			a.lastErr = formatPullError(err)
+		}
 		a.touchActivityLocked()
 		return errors.New(a.lastErr)
 	}

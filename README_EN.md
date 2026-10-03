@@ -2,7 +2,18 @@
 
 **PassDepot** is a Windows application for securely storing passwords and notes. Data is encrypted with a master password and saved in a local `.pd` file. Optionally, an encrypted copy can be synced to a private Git repository (GitHub, GitLab).
 
-Current version: **v0.2**
+Current version: **v0.3**
+
+---
+
+<p align="center">
+  <img src="docs/screenshots/passdep1.png" alt="Sign-in" width="48%" />
+  <img src="docs/screenshots/passdep2.png" alt="Vault: folders and entries" width="48%" />
+</p>
+<p align="center">
+  <img src="docs/screenshots/passdep3.png" alt="Entry details" width="48%" />
+  <img src="docs/screenshots/passdep4.png" alt="Create profile" width="48%" />
+</p>
 
 ---
 

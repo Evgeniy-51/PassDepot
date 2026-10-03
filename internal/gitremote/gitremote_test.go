@@ -30,6 +30,15 @@ func TestGitPathAndVersion(t *testing.T) {
 	}
 }
 
+func TestRunGitWithPATOverridesAccepted(t *testing.T) {
+	if _, err := GitPath(); err != nil {
+		t.Skip("no git")
+	}
+	if _, err := runGit("", "ghp_test", "version"); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestCommitAddInFreshRepo(t *testing.T) {
 	if _, err := GitPath(); err != nil {
 		t.Skip("no git")

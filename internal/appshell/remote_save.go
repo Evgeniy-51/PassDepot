@@ -81,11 +81,15 @@ func (a *App) SaveProfileRemote(repoURL, branch, pat, masterPassword string) (Re
 		a.touchActivityLocked()
 		a.mu.Unlock()
 		if err := gitremote.LsRemote(pat, repoURL); err != nil {
+			if isAuthError(err) {
+				return zero, errors.New(msgAccessDenied())
+			}
 			return zero, fmt.Errorf("%s: %w", L("доступ к репозиторию", "Repository access"), err)
 		}
 		if err := credstore.SetPAT(profileID, pat); err != nil {
 			return zero, err
 		}
+		a.reconnectAfterPAT(profileID)
 		return RemoteSaveResult{
 			Migrated:   false,
 			OldRepoURL: oldURL,
@@ -194,4 +198,32 @@ func (a *App) SaveProfileRemote(repoURL, branch, pat, masterPassword string) (Re
 		OldRepoURL: oldURL,
 		NewRepoURL: repoURL,
 	}, nil
+}
+
+// reconnectAfterPAT убирает устаревшее «PAT не задан» и пытается push/refresh.
+// Ошибки остаются в lastErr; PAT уже сохранён, вызывающий получает успех.
+func (a *App) reconnectAfterPAT(profileID string) {
+	a.mu.Lock()
+	if a.profileID != profileID || a.vault == nil {
+		a.mu.Unlock()
+		return
+	}
+	a.lastErr = ""
+	pending := a.pendingSync
+	dirty := a.dirty
+	a.touchActivityLocked()
+	a.mu.Unlock()
+
+	if pending {
+		_ = a.RetryPush()
+	}
+	if dirty {
+		return
+	}
+	a.mu.Lock()
+	ok := a.profileID == profileID && a.vault != nil && !a.dirty
+	a.mu.Unlock()
+	if ok {
+		_ = a.Refresh()
+	}
 }

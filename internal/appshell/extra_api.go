@@ -40,9 +40,30 @@ func (a *App) UpdateProfilePAT(profileID, pat string) error {
 		return errors.New(L("пустой PAT", "PAT is empty"))
 	}
 	if err := gitremote.LsRemote(pat, p.RepoURL); err != nil {
+		if isAuthError(err) {
+			return errors.New(msgAccessDenied())
+		}
 		return fmt.Errorf("%s: %w", L("доступ к репозиторию", "Repository access"), err)
 	}
 	return credstore.SetPAT(profileID, pat)
+}
+
+// ProfileHasUnsyncedChanges сообщает (без сети), есть ли в локальном клоне изменения базы,
+// не отправленные в репозиторий. При ошибке проверки возвращает true — удаление должно предупредить.
+func (a *App) ProfileHasUnsyncedChanges(profileID string) bool {
+	p, ok := profile.Get(profileID)
+	if !ok || p.LocalOnly {
+		return false
+	}
+	repoDir, err := profile.LocalRepoDir(profileID)
+	if err != nil {
+		return true
+	}
+	if _, err := os.Stat(filepath.Join(repoDir, ".git")); err != nil {
+		return !os.IsNotExist(err)
+	}
+	lc, err := gitremote.LocalChanges(repoDir, p.Branch, profile.VaultPathInRepo(p))
+	return err != nil || lc != nil
 }
 
 // RenameProfile меняет только отображаемое имя. VaultFileName / путь .pd не трогает.
@@ -75,6 +96,18 @@ func (a *App) ExportProfileJSON(profileID string) (string, error) {
 	return string(b), nil
 }
 
+// dropOrphanPAT удаляет PAT, оставшийся в Credential Manager от прежнего профиля с тем же id
+// (импорт сохраняет id). Иначе HasPAT=true и вход идёт со старым токеном без запроса нового.
+func dropOrphanPAT(id string) {
+	if strings.TrimSpace(id) == "" {
+		return
+	}
+	if _, ok := profile.Get(id); ok {
+		return
+	}
+	_ = credstore.DeletePAT(id)
+}
+
 // ImportProfileJSON добавляет профиль из JSON (без PAT; PAT ввести отдельно).
 func (a *App) ImportProfileJSON(jsonStr string) (ProfileDTO, error) {
 	var zero ProfileDTO
@@ -82,6 +115,7 @@ func (a *App) ImportProfileJSON(jsonStr string) (ProfileDTO, error) {
 	if err != nil {
 		return zero, err
 	}
+	dropOrphanPAT(p.ID)
 	np, err := profile.AddImported(p)
 	if err != nil {
 		return zero, mapProfileErr(err)
@@ -145,6 +179,7 @@ func (a *App) ImportProfileFromFile() (ProfileDTO, error) {
 	if err != nil {
 		return zero, err
 	}
+	dropOrphanPAT(prof.ID)
 	np, err := profile.AddImported(prof)
 	if err != nil {
 		return zero, mapProfileErr(err)

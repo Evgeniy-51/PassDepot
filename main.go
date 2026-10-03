@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"passdepot/internal/appshell"
+	"passdepot/internal/singleinst"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -21,6 +22,10 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
+		return
+	}
+
+	if !singleinst.Acquire() {
 		return
 	}
 

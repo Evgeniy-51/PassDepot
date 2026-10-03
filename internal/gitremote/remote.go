@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -54,8 +55,78 @@ func ResetHard(repoDir, ref string) error {
 	return runGitErr(repoDir, "", "reset", "--hard", ref)
 }
 
+// LocalChangesError — в клоне есть данные, которых нет в origin; reset --hard уничтожил бы их.
+type LocalChangesError struct {
+	Ahead       int  // локальные коммиты, не отправленные в origin/<branch>
+	Behind      int  // коммиты origin/<branch>, которых нет локально
+	Uncommitted bool // файл базы изменён, но не закоммичен
+}
+
+func (e *LocalChangesError) Error() string {
+	return fmt.Sprintf("gitremote: local changes not pushed (ahead %d, behind %d, uncommitted %t)",
+		e.Ahead, e.Behind, e.Uncommitted)
+}
+
+// LocalChanges сравнивает HEAD с последним полученным origin/<branch> (без сети).
+// vaultRel — путь файла базы в репо; пустой — незакоммиченные изменения не проверяются.
+// Возвращает nil, nil, если локальных изменений нет.
+func LocalChanges(repoDir, branch, vaultRel string) (*LocalChangesError, error) {
+	branch = strings.TrimSpace(branch)
+	if branch == "" {
+		branch = "main"
+	}
+	var ahead, behind int
+	if revExists(repoDir, "HEAD") {
+		remoteRef := "refs/remotes/origin/" + branch
+		if revExists(repoDir, remoteRef) {
+			out, err := runGitStdout(repoDir, "rev-list", "--left-right", "--count", "HEAD..."+remoteRef)
+			if err != nil {
+				return nil, err
+			}
+			f := strings.Fields(string(out))
+			if len(f) != 2 {
+				return nil, fmt.Errorf("gitremote: unexpected rev-list output %q", string(out))
+			}
+			if ahead, err = strconv.Atoi(f[0]); err != nil {
+				return nil, err
+			}
+			if behind, err = strconv.Atoi(f[1]); err != nil {
+				return nil, err
+			}
+		} else {
+			// Ветки в origin нет (пустой remote, первый push не прошёл) — все локальные коммиты не отправлены.
+			out, err := runGitStdout(repoDir, "rev-list", "--count", "HEAD")
+			if err != nil {
+				return nil, err
+			}
+			if ahead, err = strconv.Atoi(strings.TrimSpace(string(out))); err != nil {
+				return nil, err
+			}
+		}
+	}
+	uncommitted := false
+	if vaultRel = strings.TrimSpace(vaultRel); vaultRel != "" {
+		out, err := runGitStdout(repoDir, "status", "--porcelain", "--untracked-files=no", "--", vaultRel)
+		if err != nil {
+			return nil, err
+		}
+		uncommitted = strings.TrimSpace(string(out)) != ""
+	}
+	if ahead == 0 && !uncommitted {
+		return nil, nil
+	}
+	return &LocalChangesError{Ahead: ahead, Behind: behind, Uncommitted: uncommitted}, nil
+}
+
+func revExists(repoDir, rev string) bool {
+	_, err := runGitStdout(repoDir, "rev-parse", "--verify", "--quiet", rev+"^{commit}")
+	return err == nil
+}
+
 // Refresh: fetch + checkout branch + reset --hard origin/branch.
-func Refresh(pat, repoDir, branch string) error {
+// Если в клоне есть неотправленные коммиты или незакоммиченный файл базы (vaultRel),
+// reset не выполняется и возвращается *LocalChangesError.
+func Refresh(pat, repoDir, branch, vaultRel string) error {
 	branch = strings.TrimSpace(branch)
 	if branch == "" {
 		branch = "main"
@@ -67,6 +138,13 @@ func Refresh(pat, repoDir, branch string) error {
 		if err2 := runGitErr(repoDir, "", "checkout", "-b", branch, "origin/"+branch); err2 != nil {
 			return fmt.Errorf("checkout %s: %v; fallback: %w", branch, err, err2)
 		}
+	}
+	lc, err := LocalChanges(repoDir, branch, vaultRel)
+	if err != nil {
+		return fmt.Errorf("local changes: %w", err)
+	}
+	if lc != nil {
+		return lc
 	}
 	ref := "origin/" + branch
 	if err := ResetHard(repoDir, ref); err != nil {

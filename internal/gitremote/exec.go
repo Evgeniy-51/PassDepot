@@ -50,6 +50,8 @@ func Version() (string, error) {
 
 // runGit запускает git в каталоге dir (пустой = текущий процесс не меняется).
 // pat: если не пусто — добавляется -c http.extraHeader для GitHub HTTPS.
+// Пустые credential.helper / http.extraHeader сбрасывают значения из пользовательского
+// и системного gitconfig: иначе GCM показывает своё окно, а чужой Authorization конфликтует с PAT.
 // args — аргументы после git (например "fetch", "origin").
 func runGit(dir, pat string, args ...string) ([]byte, error) {
 	gp, err := GitPath()
@@ -58,7 +60,11 @@ func runGit(dir, pat string, args ...string) ([]byte, error) {
 	}
 	var full []string
 	if pat != "" {
-		full = append(full, "-c", "http.extraHeader="+authHeaderGit(pat))
+		full = append(full,
+			"-c", "credential.helper=",
+			"-c", "http.extraHeader=",
+			"-c", "http.extraHeader="+authHeaderGit(pat),
+		)
 	}
 	full = append(full, args...)
 	cmd := exec.Command(gp, full...)
@@ -66,7 +72,7 @@ func runGit(dir, pat string, args ...string) ([]byte, error) {
 	if dir != "" {
 		cmd.Dir = dir
 	}
-	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
+	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0", "GCM_INTERACTIVE=never")
 	var buf bytes.Buffer
 	cmd.Stdout = &buf
 	cmd.Stderr = &buf
@@ -76,6 +82,28 @@ func runGit(dir, pat string, args ...string) ([]byte, error) {
 		return out, fmt.Errorf("git: %w\n%s", err, string(out))
 	}
 	return out, nil
+}
+
+// runGitStdout запускает локальную (без сети) команду git и возвращает только stdout:
+// предупреждения git в stderr не должны попадать в разбираемый вывод.
+func runGitStdout(dir string, args ...string) ([]byte, error) {
+	gp, err := GitPath()
+	if err != nil {
+		return nil, err
+	}
+	cmd := exec.Command(gp, args...)
+	applySysProcAttr(cmd)
+	if dir != "" {
+		cmd.Dir = dir
+	}
+	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	if err := cmd.Run(); err != nil {
+		return stdout.Bytes(), fmt.Errorf("git: %w\n%s", err, stderr.String())
+	}
+	return stdout.Bytes(), nil
 }
 
 func runGitErr(dir, pat string, args ...string) error {

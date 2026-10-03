@@ -823,58 +823,24 @@ body {
     min-width: 0;
 }
 
-.authPatMissing {
-    margin: 0 0 18px;
-    padding: 12px 14px;
-    border-radius: 10px;
-    background: var(--pd-warning-soft);
-    border: 1px solid var(--pd-warning-border);
+.authAddRow {
+    display: flex;
+    justify-content: center;
+    margin-top: 22px;
 }
 
-.authPatMissingTxt {
-    margin: 0 0 12px;
-    font-size: 15px;
-    line-height: 1.45;
-    color: var(--pd-text);
+.authAddRow .abtn {
+    height: var(--authRowH);
+    padding: 0 22px;
 }
 
-.authPatRow {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) var(--pd-auth-btn-col);
-    gap: 10px;
-    align-items: stretch;
-}
-
-.authPatRow .passWrap,
 .authRowMain .passWrap {
     height: var(--authRowH);
 }
 
-.authPatRow .passWrap .passInp,
 .authRowMain .passWrap .passInp {
     height: 100%;
     min-height: var(--authRowH);
-}
-
-.authPatInp {
-    margin-bottom: 0;
-    height: var(--authRowH);
-    min-height: var(--authRowH);
-    box-sizing: border-box;
-}
-
-.abtnPat {
-    margin: 0;
-    width: 100%;
-    height: var(--authRowH);
-    min-height: var(--authRowH);
-    align-self: stretch;
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 10px;
-    font-size: 15px;
 }
 
 .abtnDanger {
@@ -2092,6 +2058,16 @@ textarea.einpValTex[data-expanded='1'] {
     margin-bottom: 10px;
 }
 
+.accountBlockBanner {
+    flex: 1 0 100%;
+    width: 100%;
+    margin: 0;
+}
+
+.accountBlockBanner .sheetBanner {
+    margin: 0;
+}
+
 .sheetBanner {
     margin: 0;
 }
@@ -2250,11 +2226,6 @@ textarea.einpValTex[data-expanded='1'] {
     border-radius: 8px;
     font-size: 18px;
     line-height: 26px;
-}
-
-.sheetAccount .sheetNotifications {
-    gap: 4px;
-    margin-bottom: 6px;
 }
 
 .sheetAccount .err,
@@ -2695,6 +2666,105 @@ textarea.einpValTex[data-expanded='1'] {
 }
 
 .importVaultNameActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.modal.deleteProfileModal,
+.modal.patDialogModal {
+    z-index: 80;
+}
+
+.sheetPatDialog {
+    top: 50%;
+    right: auto;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(460px, calc(100vw - 36px));
+    max-height: calc(100vh - 48px);
+    padding: 12px 14px 16px;
+}
+
+.patDialogHint {
+    margin: 0 0 10px;
+    font-size: 0.86rem;
+    line-height: 1.45;
+    color: var(--pd-text);
+}
+
+.patDialogReason {
+    margin: 0 0 12px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    line-height: 1.4;
+    background: var(--pd-warning-soft);
+    border: 1px solid var(--pd-warning-border);
+    color: var(--pd-text);
+}
+
+.sheetPatDialog .lbl {
+    margin-bottom: 4px;
+}
+
+.sheetPatDialog .inp {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.sheetPatDialog .sheetBanner {
+    margin-top: 10px;
+}
+
+.patDialogActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.sheetDeleteProfile {
+    top: 50%;
+    right: auto;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(460px, calc(100vw - 36px));
+    max-height: calc(100vh - 48px);
+    padding: 12px 14px 16px;
+}
+
+.deleteProfileWarn {
+    margin: 0 0 12px;
+    font-size: 0.86rem;
+    line-height: 1.45;
+    color: var(--pd-text);
+}
+
+.deleteProfileExport {
+    margin: 0 0 12px;
+}
+
+.sheetDeleteProfile .lbl {
+    margin-bottom: 4px;
+}
+
+.deleteProfileName {
+    color: var(--pd-danger);
+    user-select: all;
+}
+
+.sheetDeleteProfile .inp {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.sheetDeleteProfile .sheetBanner {
+    margin-top: 10px;
+}
+
+.deleteProfileActions {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;

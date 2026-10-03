@@ -4,6 +4,8 @@ package credstore
 
 import (
 	"testing"
+
+	"github.com/danieljoos/wincred"
 )
 
 func TestPATRoundtrip(t *testing.T) {
@@ -29,15 +31,22 @@ func TestPATRoundtrip(t *testing.T) {
 	}
 }
 
-func TestDeleteAllPATs(t *testing.T) {
-	const id = "test-profile-credstore-delete-all"
-	if err := SetPAT(id, "ghp_delete_all"); err != nil {
+// Тест работает на отдельном префиксе: DeleteAllPATs стёр бы реальные PAT пользователя.
+func TestDeleteAllWithPrefix(t *testing.T) {
+	const prefix = "PassDepotTest/PAT/"
+	for _, name := range []string{prefix + "a", prefix + "b"} {
+		c := wincred.NewGenericCredential(name)
+		c.CredentialBlob = []byte("ghp_delete_all")
+		if err := c.Write(); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := deleteAllWithPrefix(prefix); err != nil {
 		t.Fatal(err)
 	}
-	if err := DeleteAllPATs(); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := GetPAT(id); err == nil {
-		t.Fatal("expected missing after DeleteAllPATs")
+	for _, name := range []string{prefix + "a", prefix + "b"} {
+		if _, err := wincred.GetGenericCredential(name); err == nil {
+			t.Fatalf("%s still present after deleteAllWithPrefix", name)
+		}
 	}
 }

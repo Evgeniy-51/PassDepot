@@ -79,12 +79,8 @@ func (a *App) ChangeMasterPassword(oldPassword, newPassword string) error {
 		a.mu.Unlock()
 		return nil
 	}
-	pat, err := credstore.GetPAT(a.profileID)
-	if err != nil || pat == "" {
-		a.touchActivityLocked()
-		a.mu.Unlock()
-		return errors.New(L("PAT не найден", "PAT not found"))
-	}
+	pat, _ := credstore.GetPAT(a.profileID)
+	pat = strings.TrimSpace(pat)
 	repoDir, err := profile.LocalRepoDir(a.profileID)
 	if err != nil {
 		a.touchActivityLocked()
@@ -136,6 +132,12 @@ func (a *App) ChangeMasterPassword(oldPassword, newPassword string) error {
 	}
 	a.dirty = false
 	a.entryDirty = false
+	if pat == "" {
+		a.lastErr = msgSavedNoPAT()
+		a.touchActivityLocked()
+		a.mu.Unlock()
+		return nil
+	}
 	a.touchActivityLocked()
 	a.mu.Unlock()
 
